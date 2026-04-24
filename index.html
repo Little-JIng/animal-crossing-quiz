@@ -622,29 +622,97 @@ body {
   color: var(--animal-text-2); font-size: 14px;
   margin: 0 6px 16px; line-height: 1.6;
 }
-.date-row { display: flex; gap: 12px; justify-content: center; margin: 14px 0 6px; }
-.date-field {
-  flex: 1;
+/* === 新日期选择器：横向 chip 滚动 + 居中吸附 === */
+.date-picker {
+  margin: 18px -2px 8px;
+}
+.dp-group {
   background: var(--animal-bg);
   border-radius: 22px 18px 24px 16px / 18px 24px 16px 22px;
   box-shadow: 0 3px 0 0 var(--animal-press);
-  padding: 10px 14px;
-  text-align: center;
+  padding: 12px 4px 14px;
+  margin-bottom: 12px;
+  position: relative;
 }
-.date-field label {
-  display: block; font-size: 11px; letter-spacing: 1px;
-  color: var(--animal-text-2); margin-bottom: 2px;
+.dp-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 18px 8px;
 }
-.date-field select {
-  width: 100%;
+.dp-head .dp-label {
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--animal-text-2);
+}
+.dp-head .dp-value {
   font-family: 'Nunito', var(--animal-font);
-  font-weight: 800; font-size: 22px;
-  color: var(--animal-text);
-  border: none; background: transparent;
-  appearance: none; -webkit-appearance: none;
-  text-align: center; text-align-last: center;
-  outline: none;
+  font-weight: 800; font-size: 16px;
+  color: var(--animal-primary-active);
+  display: inline-flex; align-items: baseline; gap: 2px;
 }
+.dp-head .dp-value .suffix {
+  font-size: 11px; font-weight: 700; color: var(--animal-text-2);
+  letter-spacing: 0;
+}
+.dp-track {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 50%;
+  padding: 6px calc(50% - 24px);   /* 50% - 半个 chip 宽，让两端能滚到中心 */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.dp-track::-webkit-scrollbar { display: none; }
+
+.dp-chip {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-width: 48px; height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--animal-text-2);
+  font-family: 'Nunito', var(--animal-font);
+  font-weight: 700; font-size: 17px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .25s var(--animal-ease),
+              background .2s, color .2s, border-color .2s, box-shadow .2s;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(61, 52, 40, .06);
+}
+.dp-chip:hover { color: var(--animal-text); }
+.dp-chip.active {
+  background: var(--animal-primary);
+  color: #fff;
+  border-color: var(--animal-primary);
+  transform: scale(1.15);
+  box-shadow: 0 4px 10px rgba(25, 200, 185, .35);
+  font-size: 18px; font-weight: 800;
+}
+
+/* 左右淡出遮罩提示可滚动 */
+.dp-group::before,
+.dp-group::after {
+  content: "";
+  position: absolute; top: 38px; bottom: 14px;
+  width: 24px;
+  pointer-events: none;
+  z-index: 2;
+}
+.dp-group::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--animal-bg) 0%, transparent 100%);
+  border-top-left-radius: 22px; border-bottom-left-radius: 16px;
+}
+.dp-group::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--animal-bg) 0%, transparent 100%);
+  border-top-right-radius: 18px; border-bottom-right-radius: 24px;
+}
+
 .b-cta { text-align: center; margin-top: 18px; }
 
 /* ============ 载入页 ============ */
@@ -980,14 +1048,20 @@ body {
       <div class="b-emoji">🎂</div>
       <h2>最后一个问题</h2>
       <p class="hint">告诉我你的生日，<br>我会从匹配到的岛民里，找到和你生日最接近的那一只！</p>
-      <div class="date-row">
-        <div class="date-field">
-          <label>月</label>
-          <select id="sel-month"></select>
+      <div class="date-picker">
+        <div class="dp-group">
+          <div class="dp-head">
+            <span class="dp-label">MONTH · 月</span>
+            <span class="dp-value"><span id="dp-month-val">1</span><span class="suffix">月</span></span>
+          </div>
+          <div class="dp-track" id="dp-month"></div>
         </div>
-        <div class="date-field">
-          <label>日</label>
-          <select id="sel-day"></select>
+        <div class="dp-group">
+          <div class="dp-head">
+            <span class="dp-label">DAY · 日</span>
+            <span class="dp-value"><span id="dp-day-val">1</span><span class="suffix">日</span></span>
+          </div>
+          <div class="dp-track" id="dp-day"></div>
         </div>
       </div>
       <div class="b-cta">
@@ -1703,21 +1777,96 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
   window.scrollTo({ top:0, behavior:'instant' });
+  /* 通知各页面可进行"上台后"初始化（如 chip 居中） */
+  document.dispatchEvent(new CustomEvent('screen:show', { detail: { id } }));
+  if (id === '#screen-birthday') {
+    document.dispatchEvent(new CustomEvent('screen:birthday:show'));
+  }
 }
 
-/* ============ 初始化生日选择器 ============ */
+/* ============ 初始化生日选择器（chip 滚动 + 居中吸附） ============ */
+const DAYS_IN_MONTH = [31,29,31,30,31,30,31,31,30,31,30,31];
+
+function buildDpTrack(trackEl, max, current, onPick) {
+  trackEl.innerHTML = '';
+  for (let i = 1; i <= max; i++) {
+    const chip = document.createElement('div');
+    chip.className = 'dp-chip' + (i === current ? ' active' : '');
+    chip.textContent = i;
+    chip.dataset.val = i;
+    chip.addEventListener('click', () => onPick(i));
+    trackEl.appendChild(chip);
+  }
+}
+
+function centerActiveChip(trackEl, smooth = true) {
+  const active = trackEl.querySelector('.dp-chip.active');
+  if (!active) return;
+  const offset = active.offsetLeft - trackEl.clientWidth / 2 + active.clientWidth / 2;
+  trackEl.scrollTo({ left: offset, behavior: smooth ? 'smooth' : 'auto' });
+}
+
+function setActiveChip(trackEl, val) {
+  trackEl.querySelectorAll('.dp-chip').forEach(c => {
+    c.classList.toggle('active', +c.dataset.val === val);
+  });
+}
+
 (function initBirthday(){
-  const m = $('#sel-month'), d = $('#sel-day');
-  for (let i=1; i<=12; i++) m.innerHTML += `<option value="${i}">${i}</option>`;
-  const rebuildDays = () => {
-    const mv = +m.value;
-    const last = [31,29,31,30,31,30,31,31,30,31,30,31][mv-1];
-    const cur = Math.min(+d.value || 1, last);
-    d.innerHTML = '';
-    for (let i=1; i<=last; i++) d.innerHTML += `<option value="${i}" ${i===cur?'selected':''}>${i}</option>`;
+  const monthTrack = $('#dp-month'), dayTrack = $('#dp-day');
+  const monthVal = $('#dp-month-val'), dayVal = $('#dp-day-val');
+
+  const pickMonth = (m) => {
+    state.month = m;
+    setActiveChip(monthTrack, m);
+    monthVal.textContent = m;
+    // 重建日列表（按月天数）+ 当前日如果超界则夹紧
+    const last = DAYS_IN_MONTH[m - 1];
+    if (state.day > last) state.day = last;
+    buildDpTrack(dayTrack, last, state.day, pickDay);
+    requestAnimationFrame(() => centerActiveChip(dayTrack, false));
+    requestAnimationFrame(() => centerActiveChip(monthTrack, true));
   };
-  m.addEventListener('change', rebuildDays);
-  m.value = 1; d.innerHTML = '<option value="1">1</option>'; rebuildDays();
+  const pickDay = (d) => {
+    state.day = d;
+    setActiveChip(dayTrack, d);
+    dayVal.textContent = d;
+    centerActiveChip(dayTrack, true);
+  };
+
+  buildDpTrack(monthTrack, 12, state.month, pickMonth);
+  buildDpTrack(dayTrack, DAYS_IN_MONTH[state.month - 1], state.day, pickDay);
+
+  /* 第一次进入生日页时把当前值居中（切换 screen 之后才能算出尺寸） */
+  document.addEventListener('screen:birthday:show', () => {
+    requestAnimationFrame(() => {
+      centerActiveChip(monthTrack, false);
+      centerActiveChip(dayTrack, false);
+    });
+  });
+
+  /* 拖动滑动松手后，也吸附到离中心最近的 chip */
+  [monthTrack, dayTrack].forEach(track => {
+    let t;
+    track.addEventListener('scroll', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        const trackRect = track.getBoundingClientRect();
+        const centerX = trackRect.left + trackRect.width / 2;
+        let best = null, bestDist = Infinity;
+        track.querySelectorAll('.dp-chip').forEach(c => {
+          const r = c.getBoundingClientRect();
+          const d = Math.abs(r.left + r.width / 2 - centerX);
+          if (d < bestDist) { bestDist = d; best = c; }
+        });
+        if (best) {
+          const val = +best.dataset.val;
+          if (track === monthTrack && val !== state.month) pickMonth(val);
+          else if (track === dayTrack && val !== state.day) pickDay(val);
+        }
+      }, 120);
+    });
+  });
 })();
 
 /* ============ 渲染问题 ============ */
@@ -1919,8 +2068,7 @@ $('#btn-back-quiz').addEventListener('click', () => {
   showScreen('#screen-quiz');
 });
 $('#btn-reveal').addEventListener('click', () => {
-  state.month = +$('#sel-month').value;
-  state.day = +$('#sel-day').value;
+  /* state.month / state.day 已由 chip 点击实时更新 */
   showScreen('#screen-loading');
   setTimeout(renderResult, 1400);
 });
