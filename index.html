@@ -1,0 +1,2006 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#FBF1D6">
+<title>你是哪只动森小动物？｜无人岛小测试</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============ animal-island-ui design tokens ============ */
+:root {
+  /* 主色 —— 薄荷青 */
+  --animal-primary: #19c8b9;
+  --animal-primary-hover: #3dd4c6;
+  --animal-primary-active: #11a89b;
+  --animal-primary-bg: #e6f9f6;
+  /* 辅色 */
+  --animal-success: #6fba2c;
+  --animal-warning: #f5c31c;
+  --animal-error:   #e05a5a;
+  /* 文本 */
+  --animal-text: #794f27;
+  --animal-text-2: #9f927d;
+  --animal-text-3: #c4b89e;
+  /* 边框 */
+  --animal-border: #aaa69d;
+  --animal-border-hover: #827157;
+  /* 背景 */
+  --animal-bg: #f8f8f0;
+  --animal-bg-2: #f0e8d8;
+  --animal-card-bg: #f7f3df;
+  /* 阴影 —— 3D 按压系 */
+  --animal-shadow-sm: 0 2px 4px 0 rgba(61, 52, 40, .06);
+  --animal-shadow:    0 3px 10px 0 rgba(61, 52, 40, .1);
+  --animal-shadow-lg: 0 8px 24px 0 rgba(61, 52, 40, .14);
+  --animal-press: #bdaea0;
+  /* 圆角 */
+  --animal-radius-sm: 12px;
+  --animal-radius: 18px;
+  --animal-radius-lg: 24px;
+  /* 动效 */
+  --animal-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  /* NookPhone 应用色 */
+  --app-pink:   #f8a6b2;
+  --app-purple: #b77dee;
+  --app-blue:   #889df0;
+  --app-yellow: #f7cd67;
+  --app-orange: #e59266;
+  --app-teal:   #82d5bb;
+  /* 字体 */
+  --animal-font: 'Nunito', 'Zen Maru Gothic', 'M PLUS Rounded 1c',
+    'Noto Sans SC', -apple-system, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  --animal-font-display: 'Zen Maru Gothic', 'M PLUS Rounded 1c',
+    'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+
+/* ============ 基础 ============ */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin:0; padding:0; overscroll-behavior: none; }
+html { background: #F8F4E8; } /* 全屏统一底色（溢出到安全区也是米白）*/
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--animal-font);
+  font-weight: 600;
+  color: var(--animal-text);
+  /* 全屏统一底色 —— 温暖米白（来自 animal-island-ui Phone 组件 #F8F4E8） */
+  background: #F8F4E8;
+  background-image:
+    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(130, 213, 187, .22) 0%, transparent 55%),
+    radial-gradient(ellipse 120% 50% at 50% 100%, rgba(247, 205, 103, .18) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 40% at 0% 50%, rgba(248, 166, 178, .10) 0%, transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  padding-top: env(safe-area-inset-top);
+}
+/* 飘落的小点装饰 */
+.leaves { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.leaf {
+  position:absolute;
+  width: 14px; height: 14px;
+  border-radius: 50% 30% 60% 40% / 40% 60% 30% 50%;
+  opacity:.45;
+  animation: float 11s ease-in-out infinite;
+}
+.leaf.l1 { top:8%;  left:6%;  background: var(--app-teal);   animation-delay:0s;  }
+.leaf.l2 { top:16%; right:10%; background: var(--app-pink);   animation-delay:1.8s; width:10px; height:10px; }
+.leaf.l3 { top:42%; left:4%;  background: var(--app-yellow); animation-delay:3.1s; }
+.leaf.l4 { top:60%; right:6%; background: var(--app-blue);   animation-delay:5.0s; width:12px; height:12px; }
+.leaf.l5 { top:80%; left:12%; background: var(--app-orange); animation-delay:2.2s; width:10px; height:10px; }
+.leaf.l6 { top:30%; right:18%;background: var(--app-purple); animation-delay:5.7s; width:11px; height:11px; }
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%     { transform: translateY(-18px) rotate(20deg); }
+}
+
+/* ============ 容器（移动端优先） ============ */
+.app {
+  position: relative; z-index: 1;
+  max-width: 480px; margin: 0 auto;
+  padding: 18px 16px 0;           /* 底部交给 .page-footer 的 margin */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+.screen { flex: 1 0 auto; }
+
+/* ============ 页脚海浪（animal-island-ui Footer 风格） ============ */
+.page-footer {
+  width: 100vw;
+  margin: 40px -16px 0 -16px;     /* 消掉 .app 的左右 padding，延伸满屏 */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  height: 96px;
+  background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSIxODYiIHZpZXdCb3g9IjAgMCAxNDQwIDE4NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIj48cGF0aCBkPSJNNDYwLjIxNSAwbC0uNDE4IDYwIDQyLTUuOTI4em0yNC43MDUgODAuNDRMNDY3LjE3MiA4M2wtMTguMzI2LTIuNTM5LTE0Ljc5LTQuODdMNDI2Ljc5OCA2M2g3NWMtNC4xMTYgMTcuNTg1LTE2Ljg3OCAxNy40NC0xNi44NzggMTcuNDR6IiBmaWxsPSIjRUM3MTc1Ii8+PHBhdGggZD0iTTEyOTYuNjI0IDU2LjQ0NmMzLjI4OC0zLjk1MiAzLjY2NC0xMi4xNyAzLjIyOC0yMS41MTUtMS43MjMgNC4wNy02LjM5NiA2LjAyNS0xMC43NTMgNi44MTYtNC4zNTcuNzktOC45NzEuOTI4LTEyLjgzMyAzLjEwMWExMy41NTMgMTMuNTUzIDAgMDAtNi43NTMgOS44NzkgMTQuMDMgMTQuMDMgMCAwMC02LjE0LTguMTRjLTMuNzQyLTIuMjcyLTguMzE3LTIuNjY3LTEyLjU1NS0zLjc3My00LjIzOC0xLjEwNy04LjczMy0zLjQzOC0xMC4wMi03LjYyNy4xOTggMy40NTgtMi43NTMgMTQuMDQ3IDEuNTg0IDIwLjM3IDIuMzU3IDMuNDM3IDEwLjMxOCA5LjI4NSAyMi42MzYgNi43NzYtLjczMyAwLTcuMDcgNi42MzgtOC43MTQgMTguOTY2LS4zNzYgMi44NDUgMTguNzM0IDMuNzc0IDE3LjgyMy44MWEyNy41OTggMjcuNTk4IDAgMDEtMS4zMjYtMTAuMzcyIDExLjMwMyAxMS4zMDMgMCAwMTYuNDc1LTguODljMi43MzMtMS4xMjYgOS45ODEgMi42MjcgMTcuMzQ4LTYuNDAxeiIgZmlsbD0iIzMyN0E5MyIvPjxnIGZpbGw9IiMzMjdBOTMiPjxwYXRoIGQ9Ik0xMTYuNjIgNzQuMTExYTExLjg2OCAxMS44NjggMCAwMS0yLjYyIDEuNjI2bDUuNDM2IDkuMTYxYTcuMDU1IDcuMDU1IDAgMDA1LjA4MS0xLjUwNEE2LjY1NyA2LjY1NyAwIDAwMTI3IDc4LjgzNWwtOC4yMzMtNi45MDRhMTMuMjk3IDEzLjI5NyAwIDAxLTIuMTQ3IDIuMTh6bS4zOC01LjA0OGwtNS40MS05LjFhNy4wNzkgNy4wNzkgMCAwMC01LjEwNCAxLjUxNEE2LjY3NiA2LjY3NiAwIDAwMTA0IDY2LjA2Mmw4LjE4NCA2Ljg2OWExMS4zNyAxMS4zNyAwIDAwMi42NzYtMS42MzYgMTEuMzM2IDExLjMzNiAwIDAwMi4xNC0yLjIzMnoiLz48cGF0aCBkPSJNMTA4LjA4NyA4My44NzJsLTguMTc1LTE2LjE2OGE1Ljc3NSA1Ljc3NSAwIDAxLS41NzQtNC43MiAxMi4wMTkgMTIuMDE5IDAgMDE0LjIxNi01Ljg1bDkuNjItMy45Yy40OTYgMCAxLjAxLS4wOTggMS40ODUtLjA5OGE5LjE4NCA5LjE4NCAwIDAxNy45MTggMy40MzJjLjMyNy41MjQuNTYxIDEuMDk3LjY5MyAxLjY5N2w2LjkyOSAyMS4yNzggMS44MDEtLjg0LTYuODY5LTIwLjk2NGE3LjI3MiA3LjI3MiAwIDAwLS45NS0yLjMwMmMtMi4yNDItMi45NzMtNS44Ny00LjYxMy05LjYyLTQuMzQ5aC0xLjE0OWwtLjYzMy0xLjU0LjUzNC0uMjE1YTEuNDk0IDEuNDk0IDAgMDAuODUxLTEuOTVsLS45NS0yLjI4MmExLjUzMiAxLjUzMiAwIDAwLTEuOTgtLjgzOWwtLjk5LjQxLS44OS0zLjA2MmEuOTIuOTIgMCAwMC0uNDkzLS41ODguOTQzLjk0MyAwIDAwLS43NzQtLjAxN2wtOS42IDMuOTAxYS45NjIuOTYyIDAgMDAtLjUzMy41NmMtLjA5LjI1Mi0uMDcuNTMuMDU3Ljc2NmwxLjU0NCAyLjc3LS45OS40MWExLjQ5NCAxLjQ5NCAwIDAwLS44MyAxLjk1bC45NSAyLjI4MWMuMTQ0LjM3My40MzguNjcyLjgxMS44MjcuMzc0LjE1NC43OTYuMTUyIDEuMTY4LS4wMDhsLjU1NC0uMjE0LjYxNCAxLjUyYy00LjQ3NCAzLjc2NS02LjE1NiA4LjkzMy0zLjcwMiAxMi43OTVsNy43OCAxNS4zNjggMi4xNzctLjA1OXoiLz48L2c+PHBhdGggZD0iTTE0NDAuMDA0IDE4NVM1Ljk4NCAxODUuMDU1IDAgMTg1VjgyLjExOGM2LjE4OCAwIDkuMTU1LTIuMjkzIDEyLjU5My00Ljk2YTIzLjc2IDIzLjc2IDAgMDExNi4xODctNi4xNTUgMjMuODIgMjMuODIgMCAwMTE2LjIwOCA2LjE1NmMzLjQzOCAyLjY2NiA2LjQwNCA0Ljk2IDEyLjU5MiA0Ljk2IDYuMTg5IDAgOS4xNTUtMi4yOTQgMTIuNTkzLTQuOTYgOS4yMy04LjIxMiAyMy4xNjUtOC4yMTIgMzIuMzk1IDAgMy40MzggMi42NjYgNi40MDQgNC45NiAxMi41OTMgNC45NiA2LjE4OCAwIDkuMTU0LTIuMjk0IDEyLjU5Mi00Ljk2IDkuMjMtOC4yMTIgMjMuMTY1LTguMjEyIDMyLjM5NSAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNTkzIDQuOTZzOS4xNTUtMi4yOTQgMTIuNTkzLTQuOTZjOS4yMy04LjIxMiAyMy4xNjQtOC4yMTIgMzIuMzk1IDAgMy40MzggMi42NjYgNi40MDQgNC45NiAxMi41OTIgNC45NiA2LjE4OSAwIDkuMTU1LTIuMjk0IDEyLjU5My00Ljk2IDkuMjQtOC4yMDYgMjMuMTc0LTguMjA2IDMyLjQxNSAwIDMuNDE4IDIuNjY2IDYuMzg1IDQuOTYgMTIuNTkyIDQuOTYgNi4yMDggMCA5LjE1NS0yLjI5NCAxMi41OTMtNC45NiA5LjIzLTguMjEyIDIzLjE2NS04LjIxMiAzMi4zOTUgMCAzLjQzOCAyLjY2NiA2LjQwNSA0Ljk2IDEyLjU5MyA0Ljk2czkuMTU0LTIuMjk0IDEyLjU5Mi00Ljk2YzkuMjMxLTguMjEyIDIzLjE2NS04LjIxMiAzMi4zOTUgMCAzLjQzOCAyLjY2NiA2LjQwNSA0Ljk2IDEyLjU5MyA0Ljk2czkuMTc0LTIuMjk0IDEyLjU5My00Ljk2YzkuMjQtOC4yMDYgMjMuMTc0LTguMjA2IDMyLjQxNCAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNTkzIDQuOTZzOS4xNTUtMi4yOTQgMTIuNTkzLTQuOTZjOS4yMy04LjIxMiAyMy4xNjQtOC4yMTIgMzIuMzk1IDAgMy40MzggMi42NjYgNi40MDQgNC45NiAxMi41OTIgNC45NiA2LjE4OSAwIDkuMTc1LTIuMjk0IDEyLjU5My00Ljk2IDkuMjQtOC4yMDYgMjMuMTc0LTguMjA2IDMyLjQxNSAwIDMuNDM4IDIuNjY2IDYuNDA0IDQuOTYgMTIuNTkyIDQuOTYgNi4xODkgMCA5LjE1NS0yLjI5NCAxMi41OTMtNC45NiA5LjI0LTguMjA2IDIzLjE3NC04LjIwNiAzMi40MTUgMCAzLjQzOCAyLjY2NiA2LjQwNCA0Ljk2IDEyLjU5MiA0Ljk2IDYuMTg5IDAgOS4xNTUtMi4yOTQgMTIuNTkzLTQuOTYgOS4yNC04LjIwNiAyMy4xNzQtOC4yMDYgMzIuNDE1IDAgMy40MTggMi42NjYgNi4zODUgNC45NiAxMi41OTIgNC45NiA2LjIwOCAwIDkuMTU1LTIuMjk0IDEyLjU5My00Ljk2IDkuMjMtOC4yMTIgMjMuMTY1LTguMjEyIDMyLjM5NSAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNjEyIDQuOTYgNi4yMDggMCA5LjE1NS0yLjI5NCAxMi41OTMtNC45NiA5LjIzLTguMjEyIDIzLjE2NS04LjIxMiAzMi4zOTUgMCAzLjQzOCAyLjY2NiA2LjQwNSA0Ljk2IDEyLjU5MyA0Ljk2czkuMTc0LTIuMjk0IDEyLjYxMi00Ljk2YzkuMjMtOC4yMTIgMjMuMTY1LTguMjEyIDMyLjM5NSAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNjEyIDQuOTYgNi4yMDggMCA5LjE1NS0yLjI5NCAxMi41OTMtNC45NiA5LjIzLTguMjEyIDIzLjE2NS04LjIxMiAzMi4zOTUgMCAzLjQzOCAyLjY2NiA2LjQwNSA0Ljk2IDEyLjYxMiA0Ljk2IDYuMjA4IDAgOS4xNTUtMi4yOTQgMTIuNTkzLTQuOTYgOS4yMy04LjIxMiAyMy4xNjUtOC4yMTIgMzIuMzk1IDAgMy40MzggMi42NjYgNi40MDUgNC45NiAxMi42MTIgNC45NiA2LjIwOCAwIDkuMTU1LTIuMjk0IDEyLjU5My00Ljk2IDkuMjMtOC4yMTIgMjMuMTY1LTguMjEyIDMyLjM5NSAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNTkzIDQuOTZzOS4xNzQtMi4yOTQgMTIuNTkyLTQuOTZjOS4yNC04LjIwNiAyMy4xNzUtOC4yMDYgMzIuNDE1IDAgMy40MzggMi42NjYgNi40MDUgNC45NiAxMi41OTMgNC45NnM5LjE3NC0yLjI5NCAxMi41OTItNC45NmM5LjI0LTguMjA2IDIzLjE3NS04LjIwNiAzMi40MTUgMCAzLjQzOCAyLjY2NiA2LjQwNSA0Ljk2IDEyLjU5MyA0Ljk2czkuMTc0LTIuMjk0IDEyLjYxMi00Ljk2YzkuMjMtOC4yMTIgMjMuMTY1LTguMjEyIDMyLjM5NSAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNjEyIDQuOTYgNi4yMDggMCA5LjE1NS0yLjI5NCAxMi41OTMtNC45NiA5LjI0LTguMjA2IDIzLjE3NC04LjIwNiAzMi40MTUgMCAzLjQzOCAyLjY2NiA2LjQwNCA0Ljk2IDEyLjU5MiA0Ljk2IDYuMTg5IDAgOS4xNzUtMi4yOTQgMTIuNjEzLTQuOTYgOS4yNC04LjIwNiAyMy4xNzQtOC4yMDYgMzIuNDE1IDAgMy40MzcgMi42NjYgNi40MDQgNC45NiAxMi41OTIgNC45NiA2LjE4OCAwIDkuMTU1LTIuMjk0IDEyLjU5My00Ljk2IDkuMjQtOC4yMDYgMjMuMTc0LTguMjA2IDMyLjQxNCAwIDMuNDM4IDIuNjY2IDYuNDA1IDQuOTYgMTIuNjEzIDQuOTYgNi4yMDggMCA5LjE1NC0yLjI5NCAxMi41OTItNC45NiA5LjI0Ny04LjIwOSAyMy4xODgtOC4yMDkgMzIuNDM1IDAgMy40MzggMi42NjYgNi40MDQgNC45NiAxMi42MTIgNC45NmwuMDYzIDEwMi44ODF6IiBmaWxsPSIjOThEMkUzIi8+PHBhdGggZD0iTTc3MC4wODEgMjQuMTg5YzUuMjQ1LTIwLjUxIDIzLjE1OC0xMy4yMzUgMjguNDAzLTEwLjU4NGEuMzguMzggMCAwMC40My0uMTA4LjM2MS4zNjEgMCAwMC4wMjUtLjQzNGMtMi44OS0zLjU4LTExLjM0MS0xMy4wOC0xOS4yNzgtMTAuNzc3LTguNDEyIDIuNDU3LTExLjE4MyAxMi4xNTEtMTEuODc2IDE0LjcwNWEuMzUyLjM1MiAwIDAxLS4yNDUuMjU2LjM2Mi4zNjIgMCAwMS0uMzQ5LS4wODJjLTEuOTc5LTEuODE4LTkuNjc4LTguNDM2LTE4LjExLTUuOTk4LTcuOTE3IDIuMzIyLTkuNjk4IDE0LjgwMi0xMC4wNzQgMTkuMzQ5YS4zNDguMzQ4IDAgMDAuMjQuMzk4LjM2LjM2IDAgMDAuNDMzLS4xODVjMi45MS01LjAxMiAxMy44NTQtMjAuNzAzIDI5LjY4OS02LjM0N2EuMzcuMzcgMCAwMC40NTUuMjUyLjM2LjM2IDAgMDAuMjU3LS40NDV6bTgwLjY3IDIwLjgwMWMxNC44MjItMTUuNDI0IDI2LjQ0NS0uMTM3IDI5LjU4NSA0Ljc5NS4xLjEzLjI3My4xOC40MjYuMTIxYS4zNzMuMzczIDAgMDAuMjM3LS4zNzZjLS42NDQtNC41NTktMy4wODEtMTcuMTM0LTExLjAxOS0xOS4wNC04LjQyNC0xLjk2NS0xNS42MDEgNS4xMjgtMTcuNTUxIDcuMDkzYS4zNS4zNSAwIDAxLS41ODUtLjEzN2MtLjc0Mi0yLjU3NS0zLjk5OC0xMi4yNDItMTIuNDIzLTE0LjI2Ni03LjkzNy0xLjk2NS0xNS43MzggOC4xOTQtMTguMzUyIDExLjk4NmEuMzU2LjM1NiAwIDAwLjAyNC40NTEuMzUuMzUgMCAwMC40NDUuMDZjNS4wMTItMi45NDcgMjIuMjMyLTExLjMzNyAyOC41NSA5LjE3NmEuMzUuMzUgMCAwMC42NjMuMTM4eiIgZmlsbD0iIzZCNUM0MyIvPjxwYXRoIGQ9Ik05ODAuOTYgMTQwLjkzYTIzLjY2NiAyMy42NjYgMCAwMS0xNi4xMjUtNi4xOTdjLTMuNDMzLTIuNjQ3LTYuMzk2LTQuOTQtMTIuNTc1LTQuOTQtNi4xOCAwLTkuMTQyIDIuMjkzLTEyLjU3NSA0Ljk0LTkuMjE4IDguMjM0LTIzLjE1MiA4LjIzNC0zMi4zNyAwLTMuNDEzLTIuNjQ3LTYuMzc2LTQuOTQtMTIuNTU1LTQuOTQtNi4xOCAwLTkuMTYyIDIuMjkzLTEyLjU3NSA0Ljk0LTkuMjExIDguMjMxLTIzLjE0IDguMjMxLTMyLjM1IDAtMy40MzMtMi42NDctNi4zOTYtNC45NC0xMi41NzUtNC45NC02LjE4IDAtOS4xNjIgMi4yOTMtMTIuNTk1IDQuOTQtOS4yMSA4LjIzMS0yMy4xMzkgOC4yMzEtMzIuMzUgMC0zLjQzMy0yLjY0Ny02LjM5NS00Ljk0LTEyLjU3NS00Ljk0cy05LjE0MiAyLjI5My0xMi41NzUgNC45NEEyMy41NDggMjMuNTQ4IDAgMDE3NTEgMTQwLjkzdi01Ljg4MmM2LjE4IDAgOS4xNDItMi4yOTQgMTIuNTc1LTQuOTQxIDkuMjEtOC4yMzEgMjMuMTQtOC4yMzEgMzIuMzUgMCAzLjQzMyAyLjY0NyA2LjM5NSA0Ljk0MSAxMi41NzUgNC45NDFzOS4xNDItMi4yOTQgMTIuNTc1LTQuOTQxYzkuMjEtOC4yMzEgMjMuMTQtOC4yMzEgMzIuMzUgMCAzLjQzMyAyLjY0NyA2LjM5NSA0Ljk0MSAxMi41NzUgNC45NDFzOS4xNDItMi4yOTQgMTIuNTc1LTQuOTQxYzkuMjEtOC4yMzEgMjMuMTQtOC4yMzEgMzIuMzUgMCAzLjQzMyAyLjY0NyA2LjM5NSA0Ljk0MSAxMi41NzUgNC45NDFzOS4xNDItMi4yOTQgMTIuNTc1LTQuOTQxYzkuMjE3LTguMjM0IDIzLjE1Mi04LjIzNCAzMi4zNyAwIDMuNDEzIDIuNjQ3IDYuMzc1IDQuOTQxIDEyLjU1NSA0Ljk0MWwtLjA0IDUuODgyem0zNDQuMDQtNS44ODNjNi4xOCAwIDkuMTQyLTIuMjk0IDEyLjU3NS00Ljk0MSA5LjIxLTguMjMxIDIzLjE0LTguMjMxIDMyLjM1IDAgMy40MzMgMi42NDcgNi4zOTUgNC45NDEgMTIuNTc1IDQuOTQxczkuMTQyLTIuMjk0IDEyLjU3NS00Ljk0MWM5LjIxNy04LjIzNCAyMy4xNTItOC4yMzQgMzIuMzcgMCAzLjQxMyAyLjY0NyA2LjM3NSA0Ljk0MSAxMi41NTUgNC45NDFsLS4wNCA1Ljg4MmEyMy42NjYgMjMuNjY2IDAgMDEtMTYuMTI1LTYuMTk2Yy0zLjQzMy0yLjY0Ny02LjM5Ni00Ljk0LTEyLjU3NS00Ljk0LTYuMTggMC05LjE0MiAyLjI5My0xMi41NzUgNC45NGEyNC4yMzcgMjQuMjM3IDAgMDEtMTYuMTY1IDYuMTc2IDI0LjIzNyAyNC4yMzcgMCAwMS0xNi4yMDUtNi4xNzZjLTMuNDEzLTIuNjQ3LTYuMzc2LTQuOTQtMTIuNTU1LTQuOTQtNi4xOCAwLTkuMTYyIDIuMjkzLTEyLjU3NSA0Ljk0YTI0LjIzMSAyNC4yMzEgMCAwMS0xNi4xODUgNi4xNzR2LTUuODZ6bS05OTUgNS44ODNhMjMuODQ0IDIzLjg0NCAwIDAxLTE2LjI1NC02LjE3N2MtMy40NDctMi42NDctNi40MjItNC45NDEtMTIuNjI4LTQuOTQxcy05LjE4MSAyLjI5NC0xMi42MjkgNC45NDFjLTkuMjUgOC4yMzEtMjMuMjM4IDguMjMxLTMyLjQ4OCAwLTMuNDQ4LTIuNjQ3LTYuNDIyLTQuOTQxLTEyLjYyOC00Ljk0MXMtOS4xODEgMi4yOTQtMTIuNjMgNC45NDFjLTkuMjUgOC4yMzEtMjMuMjM3IDguMjMxLTMyLjQ4NyAwLTMuNDQ4LTIuNjQ3LTYuNDIzLTQuOTQxLTEyLjYyOS00Ljk0MS02LjIwNiAwLTkuMTggMi4yOTQtMTIuNjI4IDQuOTQxLTkuMjUgOC4yMzEtMjMuMjM4IDguMjMxLTMyLjQ4OCAwLTMuNDQ4LTIuNjQ3LTYuNDIzLTQuOTQxLTEyLjYyOS00Ljk0MS02LjIwNiAwLTkuMTggMi4yOTQtMTIuNjI4IDQuOTQxQTIzLjg0NCAyMy44NDQgMCAwMTk5IDE0MC45M3YtNS44ODJjNi4yMjYgMCA5LjE4LTIuMjk0IDEyLjYyOS00Ljk0IDkuMjUtOC4yMzIgMjMuMjM3LTguMjMyIDMyLjQ4NyAwIDMuNDQ4IDIuNjI2IDYuMzQ0IDQuOTQgMTIuNjMgNC45NCA2LjI4NCAwIDkuMTgtMi4yOTQgMTIuNjI4LTQuOTQgOS4yNTYtOC4yMzUgMjMuMjUtOC4yMzUgMzIuNTA3IDAgMy40MjggMi42NDYgNi40MDMgNC45NCAxMi42MjkgNC45NHM5LjE4LTIuMjk0IDEyLjYwOS00Ljk0YzkuMjUtOC4yMzIgMjMuMjM3LTguMjMyIDMyLjQ4OCAwIDMuNDQ3IDIuNjQ2IDYuNDIyIDQuOTQgMTIuNjI4IDQuOTRzOS4yLTIuMjk0IDEyLjY0OS00Ljk0YzkuMjUtOC4yMzIgMjMuMjM3LTguMjMyIDMyLjQ4NyAwIDMuNDQ4IDIuNjI2IDYuNDYyIDQuOTQgMTIuNjI5IDQuOTR2NS44ODJ6IiBmaWxsPSIjNjNCNkNFIi8+PHBhdGggZD0iTTQzNy41OTYgMTU5LjY5YTI1Ljk1NyAyNS45NTcgMCAwMS00LjIyNS0zLjAzOSAxNC4wNTQgMTQuMDU0IDAgMDEtMTAuNDQzLTMuMjc2IDIwLjczMyAyMC43MzMgMCAwMS0zLjU0LTQuNDI4IDUuMjcyIDUuMjcyIDAgMDEtLjI5My0uNTc2IDIuMzc4IDIuMzc4IDAgMDEwLTEuMzMgMTYuNTgyIDE2LjU4MiAwIDAxMS4zMS0zLjU5NSAxNC44NjUgMTQuODY1IDAgMDE0LjIyNC01LjIwMiA3OC4zODYgNzguMzg2IDAgMDE2Ljg4NC0zLjk3MiA1LjE5IDUuMTkgMCAwMTQuMjQ0LTMuMTU3YzguMTI4LS45MzMgMTYuMjYyIDEuNzA1IDIyLjM1MyA3LjI0OC4yMzUuMjE4LjQ3LjQxNy42ODUuNjU1YTEuODQ0IDEuODQ0IDAgMDEtLjIxNSAyLjY4bC4yMTUuMThjLjQyMS0uMDM2Ljg0LS4xMDIgMS4yNTItLjJsNi40NTMtMi4yMDNjMS43MDItLjU1NiAyLjEzMi0uMzc4IDIuMzY3IDEuNDVhMzcuMjMgMzcuMjMgMCAwMS0uNDkgOS45MjhjLS4yNTQuOTczLS40ODggMS4xNTItMS40NjYuODM0YTQ3LjI5OSA0Ny4yOTkgMCAwMC03LjM5My0yLjI4NCA2LjUxIDYuNTEgMCAwMC0xLjQyNyAwIDIuNTcgMi41NyAwIDAxLjEzNyAzLjQzNiAyMy4yMTIgMjMuMjEyIDAgMDEtNS4wODUgMy4xNTcgMzIuMjY1IDMyLjI2NSAwIDAxLTguMDM4IDIuMTQ0IDUuNjMzIDUuNjMzIDAgMDEtMy45MTEtMS4yNWgtMi42NmExMC4zNzggMTAuMzc4IDAgMDExLjU2NSAyLjk1OCA1LjI2MSA1LjI2MSAwIDAxLTIuNTAzLS4xNTl6IiBmaWxsPSIjMzI3QTkzIi8+PHBhdGggZD0iTTEyNTQuNjEzIDEzNy43MjRhMjUuODY2IDI1Ljg2NiAwIDAxLTQuMjQ3LTMuMDYzIDE0LjAyMSAxNC4wMjEgMCAwMS0xMC40NTMtMy4zNDMgMjAuNjcyIDIwLjY3MiAwIDAxLTMuNTI0LTQuNDM2IDQuMDAyIDQuMDAyIDAgMDEtLjI5NC0uNTc3IDIuNDQ1IDIuNDQ1IDAgMDEwLTEuMzUzIDE1LjgxNyAxNS44MTcgMCAwMTEuMjkyLTMuNDgyIDE0LjMzNSAxNC4zMzUgMCAwMTQuMjI5LTUuMjEyIDcxLjMwNyA3MS4zMDcgMCAwMTYuODktMy45NzkgNS4xOTYgNS4xOTYgMCAwMTQuMjQ4LTMuMTYzYzguMTMtLjkzNiAxNi4yNjYgMS43MDYgMjIuMzU0IDcuMjYxLjI0Ny4xOTguNDc3LjQxOC42ODYuNjU3YTEuODA4IDEuODA4IDAgMDEtLjIxNiAyLjY4NmwuMjE2LjE1OWE2Ljc2NSA2Ljc2NSAwIDAwMS4yNzItLjJjMi4xNTMtLjY3NiA0LjI4Ny0xLjM5MiA2LjQ0LTIuMTA4IDEuNjg0LS41NTcgMi4xMzQtLjM3OCAyLjM1IDEuNDMyYTM2Ljc4IDM2Ljc4IDAgMDEtLjQ3IDkuOTQ4Yy0uMjU1Ljk3NS0uNTEgMS4xMzQtMS40ODguODE1YTQ5LjU0NyA0OS41NDcgMCAwMC03LjQyLTIuMzY3IDYuNTUgNi41NSAwIDAwLTEuNDI4IDBjLjkwNi45MzQuOTY1IDIuNDE2LjEzNyAzLjQyMmEyMi45OTcgMjIuOTk3IDAgMDEtNS4xMSAzLjE4MyAzMS44MjcgMzEuODI3IDAgMDEtOC4wNDUgMi4xNDkgNS42OTMgNS42OTMgMCAwMS0zLjkxNS0xLjI1NGgtMi42NjJhMTAuMDAyIDEwLjAwMiAwIDAxMS41NDcgMi45NDUgNS4xNjUgNS4xNjUgMCAwMS0yLjM4OS0uMTJ6IiBmaWxsPSIjMDA4MDc3Ii8+PHBhdGggZD0iTTEwNDkuMzU4IDE1NC45MzJjMy4zMy4zMTMgNi42NDUtLjc0NyA5LjE5OS0yLjk0YTE4LjE5MSAxOC4xOTEgMCAwMDMuMS0zLjkwNWMuMS0uMTYyLjE4Ny0uMzMyLjI1OS0uNTA4YTIuMTUyIDIuMTUyIDAgMDAwLTEuMTkgMTMuOTE5IDEzLjkxOSAwIDAwLTEuMTM3LTMuMDY0IDEyLjYxNSAxMi42MTUgMCAwMC0zLjcyLTQuNTg3IDYyLjc1IDYyLjc1IDAgMDAtNi4wNjQtMy41MDEgNC41NzIgNC41NzIgMCAwMC0zLjczOC0yLjc4NGMtNy4xNTUtLjgyNC0xNC4zMTQgMS41MDItMTkuNjcyIDYuMzktLjIxOC4xNzQtLjQyLjM2OC0uNjAzLjU3OGExLjU5IDEuNTkgMCAwMC4xOSAyLjM2M2wtLjE5LjE0YTUuOTczIDUuOTczIDAgMDEtMS4xMi0uMTc1Yy0xLjg5NS0uNTk1LTMuNzczLTEuMjI1LTUuNjY3LTEuODU1LTEuNDgyLS40OS0xLjg3OC0uMzMzLTIuMDY4IDEuMjYtLjI2IDIuOTIzLS4xMiA1Ljg3LjQxNCA4Ljc1NC4yMjQuODU4LjQ0OC45OTggMS4zMS43MThhNDMuNjAxIDQzLjYwMSAwIDAxNi41MjgtMi4wODRjLjQxOC0uMDQ2Ljg0LS4wNDYgMS4yNTcgMGEyLjI2OCAyLjI2OCAwIDAwLS4xMiAzLjAxMSAyMC4yMzcgMjAuMjM3IDAgMDA0LjQ5NiAyLjgwMmMyLjI3LjkzOCA0LjY1IDEuNTc0IDcuMDggMS44OWE1LjAxIDUuMDEgMCAwMDMuNDQ1LTEuMTAzaDIuMzQyYTguODAxIDguODAxIDAgMDAtMS4zNiAyLjU5MmMuNjk5LjEzIDEuNDE4LjA5MyAyLjEwMS0uMTA1YTIyLjc2MiAyMi43NjIgMCAwMDMuNzM4LTIuNjk3eiIgZmlsbD0iIzMyN0E5MyIvPjxwYXRoIGQ9Ik02MTEuNzgzIDEyMS4wOTJjLS42NjEtLjE3OC0xLjMyMi0uMjk4LTEuOTQ1LS41MzZhMzYuNzA5IDM2LjcwOSAwIDAwLTQuODQxLTEuODI3IDQuNzQyIDQuNzQyIDAgMDAtMy44My43ODYgNC45NDMgNC45NDMgMCAwMC0yLjAwNCAzLjQyNCAxMi4xNjQgMTIuMTY0IDAgMDAwIDMuOTcxIDUuMTU5IDUuMTU5IDAgMDAyLjQzNyAzLjQ2MiA0Ljk2MyA0Ljk2MyAwIDAwNC4xNTUuNDEgMTUuNzUzIDE1Ljc1MyAwIDAwMy4wNzItMS4zNSA1Ljc1NSA1Ljc1NSAwIDAxMy4zNjQtMS4xNzEgMTUuOTM4IDE1LjkzOCAwIDAwLTEuMzYgMi4yMDQgMi43NyAyLjc3IDAgMDAuMjcgMi40ODMgMi42NTEgMi42NTEgMCAwMDIuMTQgMS4yMWMyLjY0NS4xNCA0LjcwNi0uNTM2IDguMTA5LTMuMTk3IDEuMDEuMTk5IDIuOTU1LjYzNiA0LjAyNS44MzRsLS42NDIuNDc3Yy0uNTUuMjU4LS45MTguODAzLS45NTggMS40MmExLjcgMS43IDAgMDAuNzY0IDEuNTM5IDIuNTMgMi41MyAwIDAwMi4zOTEuNjE1IDguNDg1IDguNDg1IDAgMDA0Ljg2Mi0zLjgzMmMuODY1LS4yNSAxLjc1LS40MjMgMi42NDQtLjUxNmExOS42NjggMTkuNjY4IDAgMDAzLjE3LTEuMTkyIDEwLjY3NiAxMC42NzYgMCAwMDQuOTItMy45NzFjMS44NDctMy4yNzctMi4xNC01Ljk1OC00LjM3Ni03LjUwNi0xLjQ1OC0xLjA1My0zLjYxNy0yLjEyNS01LjE3Mi0zLjA3OC0uODU4LTIuMzk2LTMuMTQ0LTMuOTQyLTUuNjQtMy44MTMtMS42MS0uMDc4LTMuMDc4Ljk0Mi0zLjU5NiAyLjUwMiAwIC4xNzkgMCAuMjU4LS4xMzcuMzk3LS4xMzYuMTQtMi44IDEuMDkyLTMuNDAyIDEuMjkxYTE5Ljg1NiAxOS44NTYgMCAwMC01LjUwMy0xLjUyOWMtMy4wOTIgMC00LjA2NCAyLjEyNS0zLjM2NCA0Ljk2NC4xNTIuNDIuMzQuODI2LjU2NCAxLjIxMmwtLjExNy4zMTd6IiBmaWxsPSIjMDA4MDc3Ii8+PHBhdGggZD0iTTY5Ni4zNTYgMTQ2LjgxNGMuNDg2LS4xNC45OTMtLjIzOSAxLjQ4LS40MThhMjcuNTA3IDI3LjUwNyAwIDAxMy42Mi0xLjM1MiAzLjU0IDMuNTQgMCAwMTIuOTA4LjU2NCAzLjY5MyAzLjY5MyAwIDAxMS41MTIgMi41OThjLjE2NS45OC4xNjUgMS45ODIgMCAyLjk2MmEzLjg1NSAzLjg1NSAwIDAxLTEuODE4IDIuNTk0IDMuNzA3IDMuNzA3IDAgMDEtMy4xMDguMzEgMTAuOTU3IDEwLjk1NyAwIDAxLTIuMzE2LTEuMDE1IDQuMzIxIDQuMzIxIDAgMDAtMi41MTItLjg3NWMuMzgyLjUyNy43MjEgMS4wODYgMS4wMTIgMS42Ny4yNTYuNjE4LjE5IDEuMzI1LS4xNzQgMS44ODItLjM2NS41NTctLjk4Ljg4OS0xLjYzNi44ODNhOC40MSA4LjQxIDAgMDEtNi4wOTQtMi40MDZjLS43Ni4xMzktMi4yMi40NzctMy4wMTguNjM2bC40ODcuMzU4Yy40MTMuMTkxLjY4OC42LjcxNyAxLjA2MmExLjI2IDEuMjYgMCAwMS0uNTggMS4xNDUgMS45MTggMS45MTggMCAwMS0xLjc5Mi40NTcgNi4zMjcgNi4zMjcgMCAwMS0zLjY2LTIuODYzIDEwLjQ1NCAxMC40NTQgMCAwMC0xLjk0Ny0uMzk4IDE0LjQ2NSAxNC40NjUgMCAwMS0yLjM5NS0uODk0IDcuOTEgNy45MSAwIDAxLTMuNjgtMi45MjNjLTEuNDAxLTIuNDQ2IDEuNTk3LTQuNDE1IDMuMjcxLTUuNjI4IDEuMDktLjc5NSAyLjcyNi0xLjYxIDMuODk0LTIuMzA2LjYzLTEuODE0IDIuMzQyLTIuOTk5IDQuMjI1LTIuOTIzIDEuMjQtLjA0NCAyLjM1Mi43NzQgMi43MDYgMS45ODggMCAuMTQgMCAuMTguMTE3LjI5OWwyLjU1Ljk3NGExNC4yMTEgMTQuMjExIDAgMDE0LjEyOC0xLjE1M2MyLjMxNyAwIDMuMDU3IDEuNTkgMi41MTEgMy43MThhNS40NjQgNS40NjQgMCAwMS0uNDA4LjkxNXYuMTM5em0tMzE3LjcyOC0yMS4wODFjLS40ODctLjEzOS0uOTk0LS4yMzgtMS40NjEtLjQxN2EyOC45ODggMjguOTg4IDAgMDAtMy42NDItMS4zNzJjLTEtLjI0LTIuMDU0LS4wMy0yLjg5NS41NzNhMy42OTIgMy42OTIgMCAwMC0xLjUwNiAyLjU4OCA5LjAwNyA5LjAwNyAwIDAwMCAyLjk4MiAzLjk3MyAzLjk3MyAwIDAwMS44MyAyLjYwMiAzLjgyOCAzLjgyOCAwIDAwMy4xMTcuMzhjLjc5Ny0uMjYgMS41NjYtLjYgMi4yOTgtMS4wMTRhNC4zODEgNC4zODEgMCAwMTIuNTMxLS44NzUgMTAuOTcgMTAuOTcgMCAwMC0xLjAxMiAxLjY1IDIuMDIzIDIuMDIzIDAgMDAuMTc0IDEuODhjLjM2NS41NTcuOTguODkgMS42MzcuODgzYTguMzM4IDguMzM4IDAgMDA2LjA3Ni0yLjM4NWMuNzYuMTM5IDIuMjIuNDc3IDMuMDM4LjYxNmwtLjQ4Ny4zNThhMS4yNzIgMS4yNzIgMCAwMC0uNzI1IDEuMDY2IDEuMjggMS4yOCAwIDAwLjU2OSAxLjE2Yy40ODguNDU3IDEuMTcuNjMgMS44MTEuNDU3YTYuNDQ2IDYuNDQ2IDAgMDAzLjY0Mi0yLjg2MiA5LjI3NiA5LjI3NiAwIDAxMS45NDctLjM5OCAxNy40NSAxNy40NSAwIDAwMi4zOTUtLjg5NCA4LjE0NyA4LjE0NyAwIDAwMy42ODEtMi45MjJjMS4zODMtMi40NjUtMS42MTYtNC40MzMtMy4yOTEtNS42NDYtMS4wOS0uNzk1LTIuNzA3LTEuNTktMy44OTUtMi4zMDYtLjYzMS0xLjgxLTIuMzQ2LTIuOTg3LTQuMjI2LTIuOTAyLTEuMjE1LS4wNjMtMi4zMjMuNzEtMi43MDcgMS44ODh2LjI5OWMtLjE5NCAwLTIuMTAzLjgxNS0yLjU1Ljk1NGExNS4wODMgMTUuMDgzIDAgMDAtNC4xMy0xLjE1M2MtMi4zMTcgMC0zLjA3NiAxLjYxLTIuNTMxIDMuNzM3LjExLjMyLjI1NC42MjYuNDI4LjkxNGwtLjExNi4xNnptNzM2Ljc1LTcuOTA2Yy40ODYtLjEzOS45OS0uMjM4IDEuNDc2LS40MTcgMS4xNzItLjU0MSAyLjM4LTEgMy42MTMtMS4zNyAxLS4yNCAyLjA1My0uMDMyIDIuODk1LjU3MWEzLjcxIDMuNzEgMCAwMTEuNTE0IDIuNTg3Yy4xNjUuOTguMTY1IDEuOTggMCAyLjk2YTMuOTcgMy45NyAwIDAxLTEuODM2IDIuNTU0IDMuODA4IDMuODA4IDAgMDEtMy4wNzguMzY3IDEyLjAzNSAxMi4wMzUgMCAwMS0yLjMxMS0xLjAxMyA0LjA1OSA0LjA1OSAwIDAwLTIuNTA2LS44NzRjLjM4Mi41Mi43MiAxLjA3IDEuMDEgMS42NDguMjU1LjYxNy4xOSAxLjMyNC0uMTc0IDEuODhhMS45MyAxLjkzIDAgMDEtMS42MzIuODgyIDguMzQ1IDguMzQ1IDAgMDEtNi4wOC0yLjM4NGwtMy4wMS42MTYuNDg1LjM1N2MuNDEyLjE5Mi42ODcuNi43MTYgMS4wNjFhMS4yNiAxLjI2IDAgMDEtLjU4IDEuMTQ1IDEuOTEyIDEuOTEyIDAgMDEtMS43ODcuNDc3IDYuMzU0IDYuMzU0IDAgMDEtMy42NTEtMi44ODEgMTAuNDkgMTAuNDkgMCAwMC0xLjk0My0uMzc4Yy0uODItLjIzMy0xLjYyLS41MzktMi4zODktLjkxNGE3Ljc5IDcuNzkgMCAwMS0zLjc0OC0yLjljLTEuMzk5LTIuNDY0IDEuNTkyLTQuNDMgMy4yNjMtNS42NDIgMS4wODgtLjc5NSAyLjcyLTEuNTkgMy44ODQtMi4zMDUuNjM0LTEuODA4IDIuMzM5LTIuOTkgNC4yMTUtMi45MiAxLjIzNS0uMDM3IDIuMzQxLjc3NyAyLjcgMS45ODYuMDMyLjEwMi4wNzEuMjAyLjExNy4yOTguMTc0IDAgMi4wNzguODM1IDIuNTQ0Ljk3NGExNC4xNjEgMTQuMTYxIDAgMDE0LjExOC0xLjE1M2MyLjMxMSAwIDMuMDUgMS42MSAyLjUwNSAzLjczNWE2LjI4OCA2LjI4OCAwIDAxLS40MDguOTE0bC4wNzguMTR6IiBmaWxsPSIjRUM3MTc1Ii8+PHBhdGggZD0iTTQ4LjY1IDEyNi44MzRjLS40ODctLjE0LS45OTQtLjIzOS0xLjQ4MS0uNDE4YTI1LjAzNCAyNS4wMzQgMCAwMC0zLjYyNi0xLjM3MiAzLjU1IDMuNTUgMCAwMC0yLjkxMi41NjQgMy42OTIgMy42OTIgMCAwMC0xLjUxNCAyLjU5OCA5LjQ0NyA5LjQ0NyAwIDAwMCAyLjk2MyAzLjk3IDMuOTcgMCAwMDEuODUgMi41NjRjLjk0LjU1NSAyLjA2NC42ODUgMy4xMDIuMzU4YTEyLjYxIDEyLjYxIDAgMDAyLjMyLTEuMDE0IDQuMjM2IDQuMjM2IDAgMDEyLjUxNS0uODk0IDExLjgxMiAxMS44MTIgMCAwMC0xLjAxNCAxLjY3Yy0uMjUzLjYxLS4xOTIgMS4zMS4xNjQgMS44NjQuMzU2LjU1NS45Ni44OTIgMS42MS45YTguMzUxIDguMzUxIDAgMDA2LjA4My0yLjM4NmwzLjA0Mi42MTYtLjQ4OC4zNThjLS40MTMuMTkxLS42OS42LS43MTggMS4wNjJhMS4yNiAxLjI2IDAgMDAuNTgyIDEuMTQ1IDEuOTIgMS45MiAwIDAwMS43OTMuNDU3IDYuMjU3IDYuMjU3IDAgMDAzLjY0Ni0yLjg2M2MuNjM4LS4xODYgMS4yOS0uMzEyIDEuOTUtLjM3OGExNS4yNzMgMTUuMjczIDAgMDAyLjM5OC0uOTE0IDcuOTc3IDcuOTc3IDAgMDAzLjY4NS0yLjkwM2MxLjQwNC0yLjQ2Ni0xLjU5OS00LjQzNC0zLjI3Ni01LjY0Ny0xLjExLS43OTYtMi43My0xLjYxLTMuODk5LTIuMzA3LS42MTgtMS44MTUtMi4zMjktMy4wMDMtNC4yMTEtMi45MjNhMi43NTEgMi43NTEgMCAwMC0yLjcxIDEuODlsLS4xMTcuMjk4Yy0uMTk1IDAtMi4xMDYuODM1LTIuNTU0Ljk3NGExNC40MiAxNC40MiAwIDAwLTQuMTMzLTEuMTUzYy0yLjMyIDAtMy4wNjEgMS41OS0yLjUzNSAzLjcxOC4xMi4zMTYuMjYzLjYyMi40My45MTRsLjAxOS4yNTl6IiBmaWxsPSIjMDA4MDc3Ii8+PHBhdGggZD0iTTEyMDQuMjc4IDE1Mi4yMjVhMS43NyAxLjc3IDAgMDAuNTEtMS4xNmMwLTEuMDAyLS42NDgtMy4wMjctLjgwNS0zLjkzLS4xNTYtLjkwNS0uMzEzLTIuMTA0LjYwOS0yLjM4IDIuMTk3LS42NjggMy4zMTUtLjY0OCAzLjU1LjU3LjI3NSAxLjU3My43MjYgNC4xNjggMS4wNCA1Ljc4LjIzMS40MTUuNjIuNzIgMS4wNzkuODQ1IDEuMzE0LS4yNTYgMi40OS0uMzM0IDMuNzg2LS43MDguNTg4LS4xNzcgMS4zNzMtLjIzNiAxLjY2Ny4yOTUuMjk0LjUzLjYyOCAzLjA2Ni0uNDkgMy4yNjMtMS41OS4yNTUtNS4xMiAxLjQ1NC03LjEwMi45NDNhLjg2Mi44NjIgMCAwMC0uOTIxLjIzNmMtMS45NjIgMS43ODktNi44NDYgNi41ODUtNy4zNTcgNy4yMzQtLjUxLjY0OC0xLjA0IDEuMjE4LS43MjUgMS44NDdhMy45MjIgMy45MjIgMCAwMDIuNDkgMS40NTVjMS4yNzYgMCA0LjA2MS0zLjM2MSA1LjItNC42NzguMzkyLS40NzIuODQzLTEuMjM5IDEuNzY1LTEuMTIuNjA4IDAgMS45NjEgMS4zNTYgMS42MDggMi4zOTctLjM1MyAxLjA0Mi0yLjg0NCAzLjcxNS0yLjg0NCAzLjk3IDAgLjI1NiAyLjI3NSAxLjk2NiAyLjIzNiAyLjkzLS4wNC45NjMtLjkyMiAyLjI0LTIuMTE4IDEuOTY1YTE3LjMzMiAxNy4zMzIgMCAwMS0yLjM5NC0yLjEyM2MtLjQ1LS40MzItMi4yNzUuOTQ0LTMuMDggMS4wODFhMTcuNzU0IDE3Ljc1NCAwIDAxLTUuNjMtMi40MzdjLS41NDgtLjM1NC01LjcwNyAzLjkzMS01Ljg4NCA1Ljg5Ny0uMTc3IDEuOTY1IDIuMjk1IDguODI1IDEuMjE2IDkuODI4YTUuNzQgNS43NCAwIDAxLTUuODg1IDEuNDE1Yy0xLjQ5LS41Ny0xLjk2MS0zLjA4Ni0yLjEzOC00LjY3OC0uOTAyLTYuMDE1LTQuNTktMTIuMjg1LTEwLjUzNC0xMS45MzEtMS45NjEuMTE4LTUuMzM1IDEuMDYxLTcuMzE2IDEuMTk5YTYuODM2IDYuODM2IDAgMDEtNC4xNC0xLjE0IDcuODYzIDcuODYzIDAgMDEtMi4zNTMtMy40OTljLS4yMTYtLjUzLS40OS0uNjI5LTEuMTM4LS4yOTUtMS41NS43ODYtOC4yLjYzLTguMTgtMS45NjUgMC0uNzg3LjIzNS0xLjczLjk4LTEuOTY2YTIuODk3IDIuODk3IDAgMDExLjM1NCAwYzEuNi4yNSAzLjIzNS4xMDggNC43NjctLjQxMy43NDUtLjI3NS0yLjI5NS00LjA2OS0uOTYxLTUuNDQ1YTIuODYgMi44NiAwIDAxMi45MjMtMS4wNDFjMS4xMzcuNDcxIDEuNTY5IDEuOTY1IDEuOTYxIDMuMDI3IDIuNjI5IDcuMTM1IDQuMTIgNy4xMzUgNS4yNTcgNy4xNzQgMi4zNjYtLjI4IDQuNzA3LS43NCA3LjAwMy0xLjM3Ni45ODEtLjI3NSAxLjA2LS40NzIuODA1LTEuNjEyLS41My0yLjM3OC0xLjM1NC00LjY3OC0xLjg0NC03LjAzNi0uMjc1LTEuMzM3LS4zMzQtMi44NS0xLjk2Mi0zLjMyMi0uNTUtLjE1Ny00LjM1NS0uNTExLTUuNjUtLjg4NWE3LjQxMyA3LjQxMyAwIDAxLTQuODY0LTMuMDQ2IDM5Ljg1IDM5Ljg1IDAgMDEtMi44MjUtNy4wMThjMC0uODg0IDIuMTE5LTIuNTE2IDIuOTIzLTEuODA4LjgwNC43MDggMi45MDMgNS41ODIgMy42NjggNi4wNTRhNi42IDYuNiAwIDAwNi4yMTggMS4wNjIgODcuMDY2IDg3LjA2NiAwIDAwLTEuNDctMTEuMTY1Yy0uMjE3LTEuMDYxLTIuNjY5LTEuOTY2LTMuNDUzLTIuNTE2LS43ODUtLjU1LTEuMTc3LTIuMzk4LS44ODMtNy4wOTYgMC0xLjIzOCAyLjcwNy0xLjE2IDMuMjk2LS41MS41ODguNjQ4LjM5MiAzLjYxNi45MDIgNC4zNDNhMi41MDcgMi41MDcgMCAwMDIuNTcuNDcyYy44NjMtLjMxNSAxLjE5Ni0uOTQ0IDEuNjI4LTQuMzA1LjExNy0uOTYzIDMuNjg4LS43NjYgMy43NDYuODY1YTYuODQ4IDYuODQ4IDAgMDEtMi4zMzQgNi4xMTNjLTEuNDEyIDEuMDYxLTEuMzE0IDEuNTUzLTEuMDQgMi42MzQuMjc1IDEuMDgxIDEuMjE3IDUuODk3IDEuMzU0IDYuNDA4LjEzNy41MS4zNzMuNTMuNjI4LjQxM2EzOS42MjIgMzkuNjIyIDAgMDA0Ljg2NC0yLjc1MmMxLjk2Mi0xLjYzMi4yNzUtNC4xMDggMS42NDgtNS41ODMuMzE0LS4zMzQgMy41OS0uODA1IDMuNzY3LjIxN2ExOC4zMDQgMTguMzA0IDAgMDEtLjQ5IDYuMzQ5IDExLjg5OCAxMS44OTggMCAwMS00LjYxIDQuNDYxYy0uOTQyLjU1LTUuMjE5IDEuNTczLTQuNzY3IDMuMzYyLjI5NCAxLjE5OSAxLjY4NyA2LjYyNCAyLjcwNyA2LjMyOWExNS4xNzUgMTUuMTc1IDAgMDA1LjA0MS0zLjEyNmMuNzY1LS41OSAxLjE1Ny0xLjUzMyAxLTMuOTMgMC0xLjQzNiAzLjkyNC0xLjgwOSAzLjkyNC0uMjM3YTkuNDkgOS40OSAwIDAxLTEuMDggNi41NjYgMTIuNDI0IDEyLjQyNCAwIDAxLTMuOTIyIDMuNDJjLS43NDYuMzUzLTMuNjY5IDEuOTY1LTMuNTEyIDIuNjkzLjI5NCAxLjE3OSAxLjgwNSA0Ljg5NCAyLjEzOCA1LjYyMS45ODEgMi4xMDMgMy4zNzQgNC40NjIgNS44ODUgMy40LjY2Ny0uMjc1IDYuODY2LTUuMTMgNy4xOC02LjIxLjIxNS0uNzA4LTIuNzg2LTcuODYzLTMuMTk4LTkuNTczYTUuNTM0IDUuNTM0IDAgMDEtLjIxNi0xLjc4OSA1Ljg5OCA1Ljg5OCAwIDAxMi4zMzUtMy41MzhjLjc0NS0uNjg4IDIuNDUyLTIuNDk2IDMuNjEtMi4xODIuMzQzLjEzOC42NDcuMzYyLjg4Mi42NDkgMi41MSAyLjYzNC0yLjkyMyAzLjkzMS0yLjE1OCA2LjI3YTUxLjg5OSA1MS44OTkgMCAwMDEuNDMyIDMuNzk0Yy41MyAxLjIzOC43MjYgMi42NzMgMi4xNzcgMS4zNzYuOTYyLS43MDggMy44MjYtMy42NTYgNC45NDQtNC42OTh6bS02NTIuMjM4IDUuMzgxYTEuNTkgMS41OSAwIDAwLjQxNi0uOTgzIDMyLjkyMSAzMi45MjEgMCAwMC0uNjc0LTMuMzgzYy0uMTM5LS44NDYtLjI3OC0xLjc3LjUxNS0xLjk2NyAxLjg2NC0uNTcgMi44MTYtLjU1IDIuOTk0LjQ3Mi4yNTggMS4zMzcuNjM1IDMuNTIuOTEyIDQuODc4LjE5NC4zNDEuNTE0LjU5NS44OTMuNzA4YTMwLjE1OCAzMC4xNTggMCAwMDMuMjMyLS42MWMuNDk1LS4xMzggMS4xNy0uMTk3IDEuNDI3LjI1Ni4yNTguNDUyLjUzNSAyLjU5Ni0uNDM2IDIuNzMzYTE3Ljk4IDE3Ljk4IDAgMDEtNS45NDguODA3LjY5OC42OTggMCAwMC0uNzc0LjE5NmMtMS42NDUgMS40OTUtNS44MjkgNS41MjctNi4yNjUgNi4wNzctLjQzNi41NTEtLjg5MiAxLjA0My0uNjE1IDEuNTU0YTMuNDE2IDMuNDE2IDAgMDAyLjEyMiAxLjI0YzEuMDcgMCAzLjQ1LTIuODMzIDQuNDIxLTMuOTM0LjMzNy0uNDEzLjcxNC0xLjA0MyAxLjUwNy0uOTQ0Ljc5My4wOTggMS42NDYgMS4xNCAxLjM0OCAxLjk2Ni0uMjk3LjgyNi0yLjM3OSAzLjIwNi0yLjM5OSAzLjQyMy0uMDIuMjE2IDEuOTgzIDEuNjEyIDEuODg0IDIuNDU4LS4xLjg0Ni0uNzczIDEuOTY3LTEuNzg1IDEuNjEzYTEzLjMwNiAxMy4zMDYgMCAwMS0xLjk4Mi0xLjc5Yy0uMzc3LS4zNTQtMS45ODMuNzg3LTIuNjE4LjkyNGExNS42NSAxNS42NSAwIDAxLTQuNzc4LTIuMDY1IDExLjUxNyAxMS41MTcgMCAwMC01LjA5NiA0LjkxN2MtLjIxOCAxLjM1NyAxLjk4MyA3LjQxNSAxLjAzMSA4LjMzOWE0Ljg4NiA0Ljg4NiAwIDAxLTQuOTc2IDEuMmMtMS4yNy0uNDcyLTEuNjA2LTIuNTk2LTEuODA1LTMuOTM0LS43NzMtNS4wNzQtMy45NjUtMTAuMzI1LTguOTYyLTEwLjAzLTEuNjg1LjA5OC00LjUyLjg4NS02LjIwNiAxLjAwM2E1Ljk4NCA1Ljk4NCAwIDAxLTMuNTEtLjk2NCA2LjUwNyA2LjUwNyAwIDAxLTEuOTgyLTIuOTNjLS4xNzgtLjQ1Mi0uNDM2LS41MzEtLjk5MS0uMjU2LTEuMzA5LjY1LTYuOTQuNTMxLTYuOTQtMS42MTMgMC0uNjQ5LjE5OC0xLjQ1NS44MzMtMS42NTJhMi4yNzggMi4yNzggMCAwMTEuMTUgMGMxLjM2Mi4yMTUgMi43NTYuMSA0LjA2NC0uMzM0LjYxNS0uMjM2LTEuOTgyLTMuNDIyLS44MzItNC41ODJhMi40MyAyLjQzIDAgMDEyLjQ5OC0uODY2Yy45NzEuMzk0IDEuMzI4IDEuNTU0IDEuNjg1IDIuNTM3IDIuMjQgNi4wMTkgMy41MSA1LjkgNC40ODEgNi4wMzggMi4wMTEtLjIyOSA0LS42MTcgNS45NDktMS4xNi44MTMtLjIzNi44OTItLjM5NC42NzQtMS4zNTctLjQzNi0xLjk2Ny0xLjE1LTMuOTM0LTEuNTY3LTUuOS0uMjE4LTEuMTIxLS4yNzctMi40LTEuNjY1LTIuNzkzLS40NTYtLjEzOC0zLjcwOC0uNDEzLTQuNzk4LS43NDdhNi40MTEgNi40MTEgMCAwMS00LjE0NC0yLjU1NyAzMy40NzMgMzMuNDczIDAgMDEtMi4zOC01LjljMC0uNzQ4IDEuODA1LTIuMTI0IDIuNDU5LTEuNTE1LjY1NC42MSAyLjQ5OCA0LjY4MSAzLjEzMyA1LjA5NGE1LjY0OCA1LjY0OCAwIDAwNS4yNzQuODg1IDczLjU3NyA3My41NzcgMCAwMC0xLjIzLTkuMzgxYy0uMTk4LS45MDUtMi4yOC0xLjY1Mi0yLjkzNC0yLjEyNC0uNjU0LS40NzItMS4wMTEtMS45NjctLjc3My01LjkgMC0xLjA0MyAyLjMtLjk4NCAyLjgxNS0uNDMzLjUxNi41NS4zMTcgMy4wMjkuNzU0IDMuNjU4LjYwNS41MjMgMS40NS42NzQgMi4yLjM5My43MzQtLjI3NSAxLjAxMi0uODA2IDEuMzY5LTMuNjE4LjExOS0uODA3IDMuMTMyLS42NSAzLjE5Mi43MDhhNS43NTggNS43NTggMCAwMS0xLjk4MyA1LjE1MmMtMS4yMS45MDUtMS4xMSAxLjI5OS0uODkyIDIuMjAzLjIxOC45MDUgMS4wNSA0Ljk3NiAxLjE1IDUuMzg5LjA5OS40MTMuMzE3LjQ1Mi41MzUuMzU0YTMzLjkwNSAzMy45MDUgMCAwMDQuMTQ0LTIuMzAxYzEuNjQ2LTEuMzc3LjIxOC0zLjQ2MSAxLjM4OC00LjcuMjU4LS4yNzYgMy4wNTQtLjY4OSAzLjE5Mi4xNzcuMTkgMS43OTMuMDUgMy42MDYtLjQxNiA1LjM0OWE5Ljg3OSA5Ljg3OSAwIDAxLTMuODI3IDMuNjM4Yy0uNzkzLjQ1My00LjQ0MSAxLjMzOC00LjA2NCAyLjgzMi4yNTcgMS4wMjMgMS40NDcgNS41NjYgMi4zIDUuMzNhMTIuODA2IDEyLjgwNiAwIDAwNC4yODItMi42MzVjLjY1NS0uNTExLjk5Mi0xLjI5OC44NTMtMy4yODUgMC0xLjIgMy4yNzItMS41MTQgMy40MS0uMTc3YTcuOTMgNy45MyAwIDAxLS45MzIgNS41MDcgMTAuNDg1IDEwLjQ4NSAwIDAxLTMuMzUgMi44NzJjLS42MzUuMjk1LTMuMTEzIDEuNzUtMi45NzUgMi4yODFhNDQuODE1IDQ0LjgxNSAwIDAwMS44MjUgNC43MmMuODEyIDEuNzcgMi44NTUgMy43NTcgNC45OTYgMi44NzJhMzAuMzA4IDMwLjMwOCAwIDAwNi4xMDctNS4yMzJjLjE3OC0uNjEtMi4zNi02LjYyOC0yLjcxNi04LjA0NGE0LjM1MiA0LjM1MiAwIDAxLS4xNzktMS41MTQgNC44MzYgNC44MzYgMCAwMTEuOTgzLTIuOTdjLjYzNC0uNTkgMi4wODItMi4xMDQgMy4wNTMtMS44MjkuMzA3LjEwNC41NzYuMjk2Ljc3NC41NSAyLjEyMSAyLjE4NC0yLjQ5OSAzLjM2NC0xLjg0NCA1LjI1MmE0My45NTUgNDMuOTU1IDAgMDAxLjIxIDMuMTg2Yy40MzUgMS4wNDIuNjM0IDIuMjYyIDEuODYzIDEuMTYuNTU1LS42NDkgMi45OTQtMy4xMjcgMy45NDYtMy45OTJ6IiBmaWxsPSIjNkI1QzQzIi8+PC9nPjwvc3ZnPg==") bottom center / auto 100% no-repeat;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+@media (min-width: 600px) {
+  .page-footer { height: 120px; background-size: auto 100%; }
+}
+.screen { display:none; animation: pop .45s var(--animal-ease); }
+.screen.active { display:block; }
+@keyframes pop {
+  0% { opacity:0; transform: translateY(14px) scale(.98); }
+  100% { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* ============ 通用卡片（有机形） ============ */
+.card {
+  position: relative;
+  background: var(--animal-card-bg);
+  border-radius: 32px 28px 34px 26px / 28px 34px 26px 32px;
+  box-shadow: var(--animal-shadow-lg);
+  padding: 22px 22px;
+  color: var(--animal-text);
+}
+.card::before { content: none; }
+.card.clean {
+  background: var(--animal-bg);
+  border-radius: var(--animal-radius-lg);
+  box-shadow: var(--animal-shadow);
+}
+
+/* ============ 按钮（3D 按压式） ============ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  font-family: var(--animal-font);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  height: 48px;
+  padding: 0 28px;
+  border: 2px solid var(--animal-bg);
+  border-radius: 50px;
+  background: var(--animal-bg);
+  color: var(--animal-text);
+  cursor: pointer;
+  box-shadow: 0 5px 0 0 var(--animal-press);
+  transition: transform .18s var(--animal-ease), box-shadow .18s var(--animal-ease), background .15s, color .15s;
+  user-select: none;
+  line-height: 1;
+}
+.btn:hover  { transform: translateY(-1px); box-shadow: 0 6px 0 0 var(--animal-press); }
+.btn:active { transform: translateY(2px);  box-shadow: 0 1px 0 0 var(--animal-press); }
+.btn.primary {
+  background: var(--animal-primary);
+  border-color: var(--animal-primary);
+  color: #fff;
+  box-shadow: 0 5px 0 0 var(--animal-primary-active);
+}
+.btn.primary:hover  { background: var(--animal-primary-hover); border-color: var(--animal-primary-hover); box-shadow: 0 6px 0 0 var(--animal-primary-active); }
+.btn.primary:active { background: var(--animal-primary-active); border-color: var(--animal-primary-active); box-shadow: 0 1px 0 0 var(--animal-primary-active); }
+.btn.warm {
+  background: var(--app-yellow);
+  border-color: var(--app-yellow);
+  color: #6b4620;
+  box-shadow: 0 5px 0 0 #c99a3d;
+}
+.btn.warm:hover  { box-shadow: 0 6px 0 0 #c99a3d; }
+.btn.warm:active { box-shadow: 0 1px 0 0 #c99a3d; }
+.btn.pink  {
+  background: var(--app-pink); border-color: var(--app-pink); color: #fff;
+  box-shadow: 0 5px 0 0 #c56a77;
+}
+.btn.pink:hover  { box-shadow: 0 6px 0 0 #c56a77; }
+.btn.pink:active { box-shadow: 0 1px 0 0 #c56a77; }
+.btn.ghost {
+  background: transparent; border-color: var(--animal-border); color: var(--animal-text);
+  box-shadow: 0 3px 0 0 var(--animal-border);
+}
+.btn.ghost:hover  { box-shadow: 0 4px 0 0 var(--animal-border); }
+.btn.ghost:active { box-shadow: 0 1px 0 0 var(--animal-border); }
+.btn.large { height: 56px; padding: 0 36px; font-size: 18px; border-radius: 56px; }
+.btn.block { display: flex; width: 100%; }
+
+/* ============ 欢迎页（官方动森图 hero + 梦幻特效） ============ */
+.welcome { padding-top: 4px; text-align: center; }
+
+/* 统一入场动画关键帧 —— 幅度夸张版 */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  0%   { opacity: 0; transform: scale(.6) rotate(-6deg); }
+  60%  { opacity: 1; transform: scale(1.08) rotate(2deg); }
+  80%  { transform: scale(.98) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(.2) translateY(20px) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(1.25) translateY(-6px) rotate(5deg); }
+  80%  { transform: scale(.92) translateY(2px) rotate(-2deg); }
+  100% { opacity: 1; transform: scale(1) translateY(0) rotate(0); }
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.welcome .brand-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fdfdf5;
+  border-radius: 40px 35px 45px 38px / 38px 45px 35px 40px;
+  padding: 8px 18px;
+  font-size: 12px; letter-spacing: 2px;
+  color: var(--animal-text-2);
+  box-shadow: var(--animal-shadow-sm);
+  animation: fade-down .8s cubic-bezier(.2, 1.4, .4, 1) .1s both;
+}
+.welcome .brand-chip .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--animal-primary);
+  box-shadow: 0 0 0 3px rgba(25, 200, 185, .2);
+  animation: blink 1.6s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+/* === Hero Stage（包裹整个图片区，提供光晕+装饰） === */
+.hero-stage {
+  position: relative;
+  margin: 18px auto 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 14px 6px;
+  animation: scale-in 1s cubic-bezier(.34, 1.56, .64, 1) .25s both;
+}
+
+/* 梦幻光晕（底层，模糊大色块） */
+.hero-stage::before {
+  content: "";
+  position: absolute; inset: -12% -10%;
+  background:
+    radial-gradient(ellipse 65% 60% at 25% 35%, rgba(247, 205, 103, .7) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 55% at 80% 25%, rgba(130, 213, 187, .65) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 60% at 50% 85%, rgba(248, 166, 178, .55) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 40% at 85% 75%, rgba(183, 125, 238, .35) 0%, transparent 65%);
+  filter: blur(32px);
+  opacity: .9;
+  z-index: -1;
+  animation: aura-drift 7s ease-in-out infinite;
+}
+@keyframes aura-drift {
+  0%,100% { transform: scale(1) rotate(0deg);     opacity: .75; }
+  25%     { transform: scale(1.12) rotate(6deg);  opacity: 1;   }
+  50%     { transform: scale(1.08) rotate(-5deg); opacity: .95; }
+  75%     { transform: scale(1.15) rotate(3deg);  opacity: .85; }
+}
+
+/* 梦幻光斑（上层，小彩点） */
+.hero-stage::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 5px at 8% 18%, rgba(255,255,255,.95) 0%, transparent 70%),
+    radial-gradient(circle 3px at 87% 12%, rgba(255,255,255,.85) 0%, transparent 70%),
+    radial-gradient(circle 6px at 14% 88%, rgba(255,255,255,.95) 0%, transparent 70%),
+    radial-gradient(circle 4px at 92% 82%, rgba(255,255,255,.8) 0%, transparent 70%),
+    radial-gradient(circle 5px at 46% 6%, rgba(255,255,255,.7) 0%, transparent 70%),
+    radial-gradient(circle 3px at 50% 94%, rgba(255,255,255,.6) 0%, transparent 70%);
+  animation: sparkle-drift 4s ease-in-out infinite;
+}
+@keyframes sparkle-drift {
+  0%,100% { opacity: .3; transform: translateY(0) scale(.9); }
+  50%     { opacity: 1;  transform: translateY(-14px) scale(1.2); }
+}
+
+/* 飘浮装饰（emoji） */
+.hero-stage .deco {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(107,92,67,.3));
+  z-index: 2;
+  will-change: transform;
+  animation-fill-mode: both;
+}
+/* 装饰入场（从中心弹出） */
+@keyframes deco-enter {
+  from { opacity: 0; transform: scale(0) rotate(-60deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+.hero-stage .deco-leaf1  { top: -2%;  left: -6%;  font-size: 26px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) .8s both, float-a 4.5s ease-in-out infinite 1.6s; }
+.hero-stage .deco-star1  { top: 6%;   right: -3%; font-size: 22px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) .95s both, twinkle 1.8s ease-in-out infinite 1.6s; }
+.hero-stage .deco-flower { top: 42%;  left: -8%;  font-size: 28px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) 1.05s both, float-b 5s ease-in-out infinite 1.8s; }
+.hero-stage .deco-leaf2  { bottom: 4%; right: -5%; font-size: 24px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) 1.15s both, float-a 5.5s ease-in-out infinite 2s; }
+.hero-stage .deco-spark1 { top: 28%;  right: -4%; font-size: 20px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) 1.25s both, twinkle 1.4s ease-in-out infinite 1.9s; }
+.hero-stage .deco-spark2 { bottom: -1%; left: 2%;  font-size: 22px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) 1.35s both, twinkle 1.6s ease-in-out infinite 2.1s; }
+.hero-stage .deco-heart  { top: 58%;  right: -7%; font-size: 22px;
+  animation: deco-enter .6s cubic-bezier(.34,1.56,.64,1) 1.45s both, float-b 6s ease-in-out infinite 2.3s; }
+
+@keyframes float-a {
+  0%,100% { transform: translate(0, 0) rotate(0deg); }
+  25%     { transform: translate(-6px, -8px) rotate(-12deg); }
+  50%     { transform: translate(-10px, -16px) rotate(-20deg); }
+  75%     { transform: translate(-4px, -10px) rotate(-8deg); }
+}
+@keyframes float-b {
+  0%,100% { transform: translate(0, 0) rotate(0deg); }
+  25%     { transform: translate(8px, -6px) rotate(15deg); }
+  50%     { transform: translate(14px, -14px) rotate(25deg); }
+  75%     { transform: translate(6px, -4px) rotate(10deg); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: .2; transform: scale(.6) rotate(0deg); }
+  50%      { opacity: 1;  transform: scale(1.5) rotate(40deg); }
+}
+
+/* Hero 图本体（有机形圆角 + 四边软虚化） */
+.hero-image-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: 32px 28px 34px 26px / 28px 34px 26px 32px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  box-shadow:
+    0 24px 48px rgba(107, 92, 67, .25),
+    0 8px 18px rgba(247, 205, 103, .35);
+  background: #F8F4E8;
+  animation: hero-bob 4.2s ease-in-out infinite 1s;
+  cursor: pointer;
+  transform-origin: 50% 60%;
+}
+@keyframes hero-bob {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%     { transform: translateY(-12px) rotate(-1.2deg); }
+}
+.hero-image {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .6s var(--animal-ease);
+  /* 四边柔化：用 radial mask 让图片边缘羽化融入米白背景 */
+  -webkit-mask-image:
+    radial-gradient(ellipse 108% 105% at center,
+      #000 55%,
+      rgba(0,0,0,.85) 75%,
+      rgba(0,0,0,.3) 92%,
+      transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 108% 105% at center,
+      #000 55%,
+      rgba(0,0,0,.85) 75%,
+      rgba(0,0,0,.3) 92%,
+      transparent 100%);
+}
+.hero-image-wrap:hover .hero-image { transform: scale(1.06); }
+
+/* 米白内圈 vignette —— 让图片边缘淡出融入背景 */
+.hero-image-wrap::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 100% 100% at center,
+      transparent 55%,
+      rgba(248, 244, 232, .45) 78%,
+      #F8F4E8 98%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 对角光泽扫过 */
+.hero-image-wrap::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg,
+    transparent 25%, rgba(255,255,255,.45) 45%,
+    rgba(255,255,255,.7) 50%, rgba(255,255,255,.45) 55%,
+    transparent 75%);
+  transform: translateX(-130%);
+  animation: shine 4s ease-in-out infinite 2.2s;
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: overlay;
+}
+@keyframes shine {
+  0%, 55% { transform: translateX(-130%); }
+  80%     { transform: translateX(130%); }
+  100%    { transform: translateX(130%); }
+}
+
+/* 飘在图下方的小徽章 */
+.hero-chips {
+  display: flex; justify-content: center; gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 4px 16px;
+}
+.hero-chips .chip {
+  background: #fdfdf5;
+  border-radius: 18px 14px 20px 12px / 14px 20px 12px 18px;
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 700;
+  color: var(--animal-text);
+  box-shadow: var(--animal-shadow-sm);
+  display: inline-flex; align-items: center; gap: 5px;
+  animation: pop-in .85s cubic-bezier(.34,1.56,.64,1) both;
+}
+.hero-chips .chip:nth-child(1) { animation-delay: 1.4s; }
+.hero-chips .chip:nth-child(2) { animation-delay: 1.55s; }
+.hero-chips .chip:nth-child(3) { animation-delay: 1.7s; }
+.hero-chips .chip .n {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  color: var(--animal-primary-active);
+  font-size: 14px;
+}
+
+/* Hero 标题 */
+.welcome h1 {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin: 2px 0 6px;
+  color: #4a3516;
+  animation: fade-up .9s cubic-bezier(.2, 1.4, .4, 1) 1.9s both;
+}
+.welcome h1 .accent {
+  color: var(--animal-primary);
+  position: relative; display: inline-block;
+}
+.welcome h1 .accent::after {
+  content: ""; position: absolute;
+  left: -2px; right: -2px; bottom: 4px; height: 10px;
+  background: rgba(25, 200, 185, .35);
+  border-radius: 6px; z-index: -1;
+  transform-origin: left center;
+  animation: hl-sweep .7s cubic-bezier(.2, 1.4, .4, 1) 2.5s both;
+}
+@keyframes hl-sweep {
+  0%   { transform: scaleX(0); }
+  70%  { transform: scaleX(1.05); }
+  100% { transform: scaleX(1); }
+}
+.welcome .sub {
+  font-size: 13px; color: var(--animal-text-2);
+  line-height: 1.6;
+  margin: 0 4px 16px;
+  animation: fade-up .8s cubic-bezier(.2, 1.4, .4, 1) 2.2s both;
+}
+
+.welcome .cta { animation: fade-up .9s cubic-bezier(.34, 1.56, .64, 1) 2.5s both; }
+.welcome .cta .btn { animation: btn-attention 2.4s ease-in-out infinite 3.5s; }
+@keyframes btn-attention {
+  0%, 82%, 100% { transform: translateY(0) scale(1); }
+  88%           { transform: translateY(-8px) scale(1.04); box-shadow: 0 11px 0 0 var(--animal-primary-active); }
+  94%           { transform: translateY(2px) scale(.98); }
+}
+
+.welcome .signature { animation: fade-up .8s var(--animal-ease) 2.8s both; }
+
+.welcome .cta { text-align: center; margin: 6px 0 0; }
+.welcome .signature {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 10px; letter-spacing: 1px;
+  color: var(--animal-text-3);
+}
+
+/* 通用 tag */
+.tag {
+  background: #fdfdf5;
+  border: none;
+  border-radius: 18px 14px 20px 12px / 14px 20px 12px 18px;
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--animal-text);
+  box-shadow: var(--animal-shadow-sm);
+  white-space: nowrap;
+}
+.tag.g { background: rgba(130, 213, 187, .22); color: #35745e; }
+.tag.b { background: rgba(136, 157, 240, .22); color: #3e4a9f; }
+.tag.p { background: rgba(248, 166, 178, .22); color: #9b4954; }
+.tag.y { background: rgba(247, 205, 103, .28); color: #806312; }
+
+/* ============ 问答页 ============ */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px; padding: 0 4px;
+}
+.progress-wrap {
+  flex: 1;
+  height: 14px;
+  background: #fdfdf5;
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgba(61, 52, 40, .08);
+  overflow: hidden;
+  position: relative;
+}
+.progress-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--animal-primary) 0%, var(--app-teal) 100%);
+  border-radius: 999px;
+  transition: width .45s var(--animal-ease);
+}
+.progress-text {
+  min-width: 52px; text-align: right;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 14px;
+  color: var(--animal-text-2);
+}
+
+.question-card { padding: 22px 20px 24px; }
+.q-label {
+  display: inline-block;
+  background: var(--animal-primary-bg);
+  color: var(--animal-primary-active);
+  border-radius: 14px 10px 16px 8px / 10px 16px 8px 14px;
+  padding: 4px 12px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.q-text {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 22px; line-height: 1.45;
+  color: var(--animal-text);
+  margin: 6px 2px 18px;
+}
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--animal-bg);
+  border-radius: 22px 18px 24px 16px / 18px 24px 16px 22px;
+  box-shadow: 0 3px 0 0 var(--animal-press), var(--animal-shadow-sm);
+  cursor: pointer;
+  transition: transform .18s var(--animal-ease),
+              box-shadow .18s var(--animal-ease),
+              background .15s;
+  font-size: 15px; font-weight: 600; line-height: 1.45;
+  color: var(--animal-text);
+}
+.option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 var(--animal-press), var(--animal-shadow);
+  background: #fefef8;
+}
+.option:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 var(--animal-press);
+}
+.option .opt-emoji {
+  font-size: 24px; width: 36px; text-align: center; flex: 0 0 36px;
+}
+.option .opt-text { flex: 1; }
+
+.navrow { display: flex; justify-content: space-between; margin-top: 16px; padding: 0 4px; }
+.link-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  color: var(--animal-text-2);
+  padding: 10px 14px;
+}
+.link-btn:hover { color: var(--animal-primary); }
+.link-btn:disabled { opacity: .35; cursor: default; }
+
+/* ============ 生日页 ============ */
+.birthday .card { text-align: center; }
+.birthday .b-emoji {
+  font-size: 52px; line-height: 1;
+  margin: 6px 0 2px;
+  animation: bounce 2.5s infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-8px) rotate(-4deg); }
+}
+.birthday h2 {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 26px; margin: 4px 0 6px;
+  color: var(--animal-text);
+}
+.birthday .hint {
+  color: var(--animal-text-2); font-size: 14px;
+  margin: 0 6px 16px; line-height: 1.6;
+}
+.date-row { display: flex; gap: 12px; justify-content: center; margin: 14px 0 6px; }
+.date-field {
+  flex: 1;
+  background: var(--animal-bg);
+  border-radius: 22px 18px 24px 16px / 18px 24px 16px 22px;
+  box-shadow: 0 3px 0 0 var(--animal-press);
+  padding: 10px 14px;
+  text-align: center;
+}
+.date-field label {
+  display: block; font-size: 11px; letter-spacing: 1px;
+  color: var(--animal-text-2); margin-bottom: 2px;
+}
+.date-field select {
+  width: 100%;
+  font-family: 'Nunito', var(--animal-font);
+  font-weight: 800; font-size: 22px;
+  color: var(--animal-text);
+  border: none; background: transparent;
+  appearance: none; -webkit-appearance: none;
+  text-align: center; text-align-last: center;
+  outline: none;
+}
+.b-cta { text-align: center; margin-top: 18px; }
+
+/* ============ 载入页 ============ */
+.loading .card { text-align: center; padding: 40px 20px; }
+.loading h2 {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 20px; margin: 14px 0 6px;
+  color: var(--animal-text);
+}
+.loading p { color: var(--animal-text-2); font-size: 14px; }
+.loading .dots {
+  display: inline-flex; gap: 10px; margin: 16px 0 10px;
+}
+.loading .dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--animal-primary);
+  animation: jump 1s infinite;
+}
+.loading .dot:nth-child(2){ background: var(--app-yellow); animation-delay:.15s; }
+.loading .dot:nth-child(3){ background: var(--app-pink);   animation-delay:.30s; }
+.loading .dot:nth-child(4){ background: var(--app-blue);   animation-delay:.45s; }
+@keyframes jump { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
+
+/* ============ 结果页 ============ */
+.result { animation: popBig .6s cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes popBig { 0%{opacity:0;transform:scale(.9)} 100%{opacity:1;transform:scale(1)} }
+.result .banner {
+  text-align: center;
+  color: var(--animal-text-2);
+  font-size: 12px; letter-spacing: 3px;
+  margin: 6px 0 10px;
+}
+.result .banner::before, .result .banner::after {
+  content: "✦"; margin: 0 8px; color: var(--animal-primary);
+}
+
+.char-card {
+  position: relative;
+  background: #fdfdf5;
+  border-radius: 36px 30px 40px 26px / 30px 40px 26px 36px;
+  box-shadow: var(--animal-shadow-lg);
+  padding: 26px 22px 22px;
+  text-align: center;
+  overflow: hidden;
+}
+.char-card::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(25, 200, 185, .08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.r-portrait-wrap {
+  position: relative;
+  width: 200px; height: 200px;
+  margin: 4px auto 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fefde8 0%, var(--animal-primary-bg) 70%, #c1ede7 100%);
+  box-shadow: inset 0 -6px 12px rgba(25, 200, 185, .08), 0 8px 20px rgba(25, 200, 185, .2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.r-portrait-wrap::before {
+  content: "";
+  position: absolute; inset: -2px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, .8) 0 16px, transparent 20px),
+    radial-gradient(circle at 82% 30%, rgba(25, 200, 185, .25) 0 10px, transparent 12px);
+  pointer-events: none;
+}
+.r-portrait {
+  width: 92%; height: 92%;
+  object-fit: contain;
+  object-position: center 55%;
+  filter: drop-shadow(0 4px 6px rgba(61, 52, 40, .18));
+  animation: bobble 2.8s ease-in-out infinite;
+  position: relative; z-index: 1;
+}
+@keyframes bobble {
+  0%,100% { transform: translateY(0); }
+  50%    { transform: translateY(-6px); }
+}
+.r-portrait-fallback { font-size: 100px; line-height: 1; }
+.r-jp {
+  margin: 2px 0 4px;
+  font-size: 13px; color: var(--animal-text-2); letter-spacing: 1px;
+}
+.r-name {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 34px; letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin: 10px 4px 2px;
+  color: var(--animal-text);
+  word-break: keep-all;
+}
+.r-tags { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 10px 0 14px; }
+.r-desc {
+  background: #fff;
+  border-radius: 18px 14px 22px 12px / 14px 22px 12px 18px;
+  padding: 14px 16px;
+  text-align: left;
+  margin: 12px 4px 0;
+  font-size: 15px; line-height: 1.75;
+  color: var(--animal-text);
+  box-shadow: var(--animal-shadow-sm);
+}
+.r-meta {
+  display: flex; justify-content: space-around;
+  background: var(--animal-primary-bg);
+  border-radius: 18px 14px 22px 12px / 14px 22px 12px 18px;
+  padding: 12px 14px; margin: 14px 4px 4px;
+  font-size: 13px; color: var(--animal-text);
+}
+.r-meta b {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 16px; color: var(--animal-primary-active);
+  display: block; margin-top: 2px;
+}
+
+.match-list {
+  margin: 16px 2px 0; padding: 16px;
+  background: #fdfdf5;
+  border-radius: 24px 20px 28px 18px / 20px 28px 18px 24px;
+  box-shadow: var(--animal-shadow-sm);
+}
+.match-list h3 {
+  margin: 0 0 12px;
+  font-family: var(--animal-font-display); font-weight: 900;
+  font-size: 16px;
+  color: var(--animal-text);
+}
+.match-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.match-list li.match-item {
+  background: var(--animal-bg);
+  border-radius: 16px 12px 18px 10px / 12px 18px 10px 16px;
+  padding: 10px 14px; font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 0 0 var(--animal-press);
+  transition: transform .15s var(--animal-ease), box-shadow .15s var(--animal-ease), background .15s;
+  color: var(--animal-text);
+}
+.match-list li.match-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--animal-press);
+  background: #fefef8;
+}
+.match-list li.match-item:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 0 var(--animal-press);
+}
+.match-list li.match-item::after {
+  content: "›";
+  color: var(--animal-primary);
+  font-size: 20px; margin-left: 8px;
+  font-weight: 800;
+}
+.match-list .mi-sub {
+  color: var(--animal-text-2); font-size: 12px; margin-left: 8px; font-weight: 600;
+}
+
+/* ============ 详情页 ============ */
+.detail { animation: pop .5s var(--animal-ease); }
+.detail-card {
+  position: relative;
+  background: #fdfdf5;
+  border-radius: 32px 28px 34px 26px / 28px 34px 26px 32px;
+  box-shadow: var(--animal-shadow-lg);
+  padding: 20px 18px 22px;
+  overflow: hidden;
+}
+.detail-card::before { content: none; }
+.d-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+.d-portrait-wrap {
+  position: relative; flex: 0 0 110px;
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fefde8 0%, var(--animal-primary-bg) 70%, #c1ede7 100%);
+  box-shadow: inset 0 -4px 8px rgba(25, 200, 185, .08), 0 6px 14px rgba(25, 200, 185, .2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.d-portrait {
+  width: 92%; height: 92%; object-fit: contain; object-position: center 55%;
+  filter: drop-shadow(0 3px 4px rgba(61, 52, 40, .2));
+}
+.d-portrait-fb { font-size: 56px; line-height: 1; }
+
+.d-title { flex: 1; min-width: 0; }
+.d-name {
+  font-family: var(--animal-font-display);
+  font-weight: 900;
+  font-size: 26px; line-height: 1.1;
+  color: var(--animal-text);
+  letter-spacing: -0.5px;
+  word-break: keep-all;
+}
+.d-fname {
+  font-size: 12px; color: var(--animal-text-2);
+  margin-top: 4px;
+  word-break: break-all; line-height: 1.4;
+}
+.d-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.d-tags .tag { font-size: 11px; padding: 4px 10px; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 8px 0 6px;
+}
+.info-item {
+  background: var(--animal-bg);
+  border-radius: 18px 14px 20px 12px / 14px 20px 12px 18px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 0 0 var(--animal-press);
+  min-height: 72px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.info-item.full { grid-column: span 2; }
+.info-item .info-label {
+  font-size: 11px; letter-spacing: 1px;
+  color: var(--animal-text-2); font-weight: 700;
+  display: flex; align-items: center; gap: 4px;
+  margin-bottom: 4px;
+}
+.info-item .info-value {
+  font-size: 15px; color: var(--animal-text);
+  font-weight: 800;
+  line-height: 1.45; word-break: break-word;
+}
+.info-item.accent-y { background: rgba(247, 205, 103, .25); box-shadow: 0 2px 0 0 #d4a94f; }
+.info-item.accent-p { background: rgba(248, 166, 178, .22); box-shadow: 0 2px 0 0 #c56a77; }
+.info-item.accent-g { background: rgba(130, 213, 187, .22); box-shadow: 0 2px 0 0 #4fa58a; }
+.info-item.accent-b { background: rgba(136, 157, 240, .18); box-shadow: 0 2px 0 0 #6a7acc; }
+.info-item.accent-o { background: rgba(229, 146, 102, .22); box-shadow: 0 2px 0 0 #b4714f; }
+
+.d-source {
+  text-align: center; color: var(--animal-text-3);
+  font-size: 11px; margin-top: 12px;
+}
+.d-source a { color: var(--animal-primary-active); }
+
+.actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+
+@media (max-width: 400px) {
+  .q-text { font-size: 20px; }
+  .r-name { font-size: 28px; }
+  .r-portrait-wrap { width: 170px; height: 170px; }
+  .d-portrait-wrap { flex-basis: 92px; width: 92px; height: 92px; }
+  .d-name { font-size: 22px; }
+  .info-item { padding: 10px 12px; min-height: 62px; }
+  .info-item .info-value { font-size: 14px; }
+  .brand-chip { font-size: 11px; padding: 7px 14px; letter-spacing: 1px; }
+  .btn.large { height: 52px; font-size: 16px; }
+}
+@media (max-width: 340px) {
+  .phone { max-width: 300px; }
+}
+</style>
+</head>
+<body>
+<div class="leaves" aria-hidden="true">
+  <div class="leaf l1"></div>
+  <div class="leaf l2"></div>
+  <div class="leaf l3"></div>
+  <div class="leaf l4"></div>
+  <div class="leaf l5"></div>
+  <div class="leaf l6"></div>
+</div>
+
+<main class="app">
+
+  <!-- ============ 欢迎页（官方图 hero 版） ============ -->
+  <section id="screen-welcome" class="screen welcome active">
+
+    <div class="brand-chip"><span class="dot"></span>🧀芝选 · 🏝️无人岛</div>
+
+    <!-- 官方动森立绘 + 梦幻光晕 + 飘浮装饰 -->
+    <div class="hero-stage">
+      <span class="deco deco-leaf1"  aria-hidden="true">🌿</span>
+      <span class="deco deco-star1"  aria-hidden="true">⭐</span>
+      <span class="deco deco-flower" aria-hidden="true">🌸</span>
+      <span class="deco deco-leaf2"  aria-hidden="true">🍃</span>
+      <span class="deco deco-spark1" aria-hidden="true">✨</span>
+      <span class="deco deco-spark2" aria-hidden="true">✨</span>
+      <span class="deco deco-heart"  aria-hidden="true">💛</span>
+      <div class="hero-image-wrap">
+        <img class="hero-image" src="isabelle-welcome.png" alt="欢迎来到无人岛">
+      </div>
+    </div>
+
+    <div class="hero-chips">
+      <span class="chip">🐾 <span class="n">413</span> 位岛民</span>
+      <span class="chip">🎯 <span class="n">14</span> 题</span>
+      <span class="chip">⏱ 约 <span class="n">2</span> 分钟</span>
+    </div>
+
+    <h1>你是哪只<span class="accent">动森小动物</span>？</h1>
+    <p class="sub">回答几个小问题，再告诉我你的生日，<br>我会为你找到最像的那一只。</p>
+
+    <div class="cta">
+      <button class="btn primary large block" id="btn-start">出发去无人岛 →</button>
+    </div>
+
+    <div class="signature">非物质文化遗产 · 手搓产品 · 继承人 · 佳芝</div>
+  </section>
+
+  <!-- ============ 问答页 ============ -->
+  <section id="screen-quiz" class="screen">
+    <div class="topbar">
+      <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      <div class="progress-text" id="progress-text">1 / 14</div>
+    </div>
+    <div class="card question-card">
+      <span class="q-label" id="q-label">问题 01</span>
+      <div class="q-text" id="q-text">…</div>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="navrow">
+      <button class="link-btn" id="btn-prev">← 上一题</button>
+      <button class="link-btn" id="btn-restart">↺ 重新开始</button>
+    </div>
+  </section>
+
+  <!-- ============ 生日页 ============ -->
+  <section id="screen-birthday" class="screen birthday">
+    <div class="card">
+      <div class="b-emoji">🎂</div>
+      <h2>最后一个问题</h2>
+      <p class="hint">告诉我你的生日，<br>我会从匹配到的岛民里，找到和你生日最接近的那一只！</p>
+      <div class="date-row">
+        <div class="date-field">
+          <label>月</label>
+          <select id="sel-month"></select>
+        </div>
+        <div class="date-field">
+          <label>日</label>
+          <select id="sel-day"></select>
+        </div>
+      </div>
+      <div class="b-cta">
+        <button class="btn primary" id="btn-reveal">揭晓结果 ✨</button>
+      </div>
+    </div>
+    <div class="navrow">
+      <button class="link-btn" id="btn-back-quiz">← 返回上一题</button>
+      <button class="link-btn" id="btn-restart2">↺ 重新开始</button>
+    </div>
+  </section>
+
+  <!-- ============ 载入页 ============ -->
+  <section id="screen-loading" class="screen loading">
+    <div class="card">
+      <div class="box">
+        <div style="font-size:60px">🔍</div>
+        <h2>K.K. 正在翻找岛民名簿…</h2>
+        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <p>马上为你揭晓最像你的小动物～</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 结果页 ============ -->
+  <section id="screen-result" class="screen result">
+    <div class="banner">测试结果</div>
+    <div class="char-card">
+      <div class="r-portrait-wrap">
+        <img id="r-portrait" class="r-portrait" alt="" referrerpolicy="no-referrer">
+        <div class="r-portrait-fallback" id="r-portrait-fb" style="display:none">🐾</div>
+      </div>
+      <div class="r-name" id="r-name">—</div>
+      <div class="r-jp" id="r-jp">—</div>
+      <div class="r-tags" id="r-tags"></div>
+      <div class="r-desc" id="r-desc">—</div>
+      <div class="r-meta">
+        <span>🎂 生日 <b id="r-birth">—</b></span>
+        <span>🎲 匹配度 <b id="r-score">—</b></span>
+      </div>
+    </div>
+
+    <div class="match-list" id="match-list">
+      <h3>✨ 你也像这些可爱的小动物</h3>
+      <ul id="match-list-ul"></ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-detail">🔍 查看完整档案</button>
+    </div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn warm" id="btn-again">再测一次</button>
+      <button class="btn pink"  id="btn-share">截图分享 📸</button>
+    </div>
+  </section>
+
+  <!-- ============ 详情页 ============ -->
+  <section id="screen-detail" class="screen detail">
+    <div class="banner" id="d-banner">岛民档案</div>
+    <div class="detail-card">
+      <div class="d-header">
+        <div class="d-portrait-wrap">
+          <img id="d-portrait" class="d-portrait" alt="" referrerpolicy="no-referrer">
+          <div id="d-portrait-fb" class="d-portrait-fb" style="display:none">🐾</div>
+        </div>
+        <div class="d-title">
+          <div class="d-name" id="d-name">—</div>
+          <div class="d-fname" id="d-fname">—</div>
+          <div class="d-tags" id="d-tags"></div>
+        </div>
+      </div>
+
+      <div class="info-grid" id="info-grid"></div>
+
+      <div class="d-source">
+        数据 &amp; 立绘来自 <a id="d-wikilink" href="#" target="_blank" rel="noopener">Bilibili Wiki · 集合啦动物森友会</a>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:18px">
+      <button class="btn ghost" id="btn-detail-close">← 返回结果</button>
+      <button class="btn warm" id="btn-detail-again">重新测试</button>
+    </div>
+  </section>
+
+  <!-- ============ 页脚海浪（全页共用） ============ -->
+  <div class="page-footer" aria-hidden="true"></div>
+
+</main>
+
+<script>
+/* ============ 岛民数据（共 413 位，来自 Bilibili Wiki 动森资料库） ============
+     n=中文名 g=性别 s=种族 p=性格 pf=性格全称(含 A/B型) m/d=生日
+     c=初始口头禅 h=爱好 st=风格偏好 co=喜爱颜色 pt=音高
+     mo=座右铭 fn=常见外文名 img=立绘 URL  ================================ */
+const VILLAGERS = [
+{n:"阳明",g:"♂",s:"食蚁兽",p:"暴躁",pf:"暴躁B型",m:3,d:9,c:"有的",h:"教育",st:"酷、活跃",co:"黄色、米色",pt:"低",mo:"义无反顾",fn:"さくらじま(日) Cyrano(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/3f1qchqu7q74dsis7uyz7jfqt6xgo0d.png"},
+{n:"阿诚",g:"♂",s:"食蚁兽",p:"运动",pf:"运动B型",m:10,d:20,c:"真诚",h:"健身",st:"简单",co:"浅蓝色、蓝色",pt:"高",mo:"追求本真",fn:"マコト(日) Antonio(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/01/mnuuv9nmyb8q7qv8fuqflzn8ds465zp.png"},
+{n:"熊战士",g:"♂",s:"大熊",p:"自恋",pf:"自恋A型",m:3,d:31,c:"over",h:"教育",st:"简单",co:"灰色、白色",pt:"中",mo:"条条大路通罗马",fn:"クマロス(日) Klaus(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/93/fgjyv3jqk743p9b1jsfyldco50rnqpg.png"},
+{n:"巴克思",g:"♂",s:"大熊",p:"悠闲",pf:"悠闲B型",m:8,d:16,c:"嗯是",h:"游戏",st:"简单",co:"白色、绿色",pt:"中",mo:"诚实能让你走得更远",fn:"バッカス(日) Nate(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/03/fvd09yel4l88x5pk1rmyiwmf9mhhp1w.png"},
+{n:"佩希",g:"♀",s:"食蚁兽",p:"活泼",pf:"元气B型",m:11,d:9,c:"希希",h:"时尚",st:"优雅、酷",co:"橙色、紫色",pt:"高",mo:"绝世美女",fn:"パトラ(日) Pango(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/29/2rfhy4aut3y01csbq66kubh0kwk1mwk.png"},
+{n:"叽叽",g:"♀",s:"鸟",p:"活泼",pf:"元气B型",m:7,d:13,c:"叽",h:"时尚",st:"简单、可爱",co:"粉色、蓝色",pt:"高",mo:"早起的鸟儿有虫吃",fn:"ピーチク(日) Twiggy(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/peygnbpmeg60vwfc7j1vk4sghk1o2ku.png"},
+{n:"瑞秋",g:"♀",s:"大熊",p:"大姐姐",pf:"大姐姐B型",m:3,d:22,c:"耶呼",h:"健身",st:"可爱、活跃",co:"橙色、绿色",pt:"中",mo:"流行总是周而复始",fn:"レイチェル(日) Paula(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e7/7148nh94i4q82syg04fg0bp8iw5stpn.png"},
+{n:"太平",g:"♂",s:"大熊",p:"运动",pf:"运动B型",m:9,d:26,c:"太好了",h:"健身",st:"简单",co:"黄色、橙色",pt:"高",mo:"和平并非一己之力",fn:"たいへいた(日) Teddy(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b1/rqludwtc1t21mysovsikt1ndjqs2kvf.png"},
+{n:"余板",g:"♂",s:"鸟",p:"悠闲",pf:"悠闲A型",m:8,d:24,c:"话说",h:"自然",st:"简单",co:"绿色、红色",pt:"中",mo:"匹夫无罪，怀璧其罪",fn:"ジャコテン(日) Jakey(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9f/8wjrxnztbhlkglfnw74prxo73twgmte.png"},
+{n:"糖果",g:"♀",s:"大熊",p:"普通",pf:"普通A型",m:3,d:13,c:"舔舔",h:"自然",st:"可爱、简单",co:"黄色、浅蓝色",pt:"中",mo:"读书百遍，其义自见",fn:"キャンディ(日) Megan(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0c/lp09t1ac40s27x1e0q3alhdxbugfmin.png"},
+{n:"爪爪",g:"♂",s:"大熊",p:"暴躁",pf:"暴躁B型",m:10,d:23,c:"哇哇",h:"音乐",st:"酷、简单",co:"黑色、灰色",pt:"低",mo:"年轻时的辛劳弥足珍贵",fn:"クロー(日) Groucho(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/ab/5n8lmrx77x4zaq0c58c751fphgs3g2j.png"},
+{n:"有美",g:"♀",s:"食蚁兽",p:"活泼",pf:"元气B型",m:2,d:16,c:"真的假的",h:"时尚",st:"可爱、简单",co:"绿色、蓝色",pt:"高",mo:"宏伟人生",fn:"あるみ(日) Anabelle(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fd/6dckpnus6jnvqyxgvxzvulo3xzesxpo.png"},
+{n:"纪诺",g:"♂",s:"鸟",p:"运动",pf:"运动B型",m:2,d:2,c:"诺诺",h:"健身",st:"活跃",co:"黄色、橙色",pt:"高",mo:"集体行动不如单枪匹马",fn:"ジーニョ(日) Jitters(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/68/o1xzpnl4pbpnjiluvt7eiqsmej9cpkv.png"},
+{n:"大功",g:"♂",s:"大熊",p:"暴躁",pf:"暴躁A型",m:5,d:16,c:"施主",h:"自然",st:"酷",co:"绿色、蓝色",pt:"中",mo:"可怜天下父母心",fn:"ダイク(日) Ike(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b6/5vkxwei43ar4fs0nvtkflvxt2bolhpa.png"},
+{n:"丹丹",g:"♀",s:"大熊",p:"活泼",pf:"元气B型",m:9,d:9,c:"哇哦",h:"时尚",st:"可爱、简单",co:"红色、粉色",pt:"高",mo:"热烈欢迎",fn:"タンタン(日) Pinky(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8c/mqyphld9pr5k88zcymr4mjugln9oh4r.png"},
+{n:"阿燕",g:"♂",s:"鸟",p:"运动",pf:"运动B型",m:7,d:17,c:"呢喃",h:"健身",st:"活跃",co:"蓝色、浅蓝色",pt:"高",mo:"顺其自然",fn:"ツバクロ(日) Jay(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/93/8gjxl0xwtewfx1frot3soj823141un0.png"},
+{n:"恋恋",g:"♀",s:"大熊",p:"活泼",pf:"元气B型",m:9,d:15,c:"加油",h:"时尚",st:"可爱、简单",co:"粉色、红色",pt:"高",mo:"橘生淮南则为橘",fn:"れんにゅう(日) Tutu(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e5/3z8cu1d44hcxfzx4ho0lrz5pp4jxe3l.png"},
+{n:"贵妃",g:"♀",s:"食蚁兽",p:"成熟",pf:"成熟A型",m:10,d:24,c:"麻烦了",h:"教育",st:"简单",co:"绿色、黄色",pt:"低",mo:"女子能顶半边天",fn:"こまち(日) Snooty(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c3/p8t76tahby1x89j101hho6ffnxnmoml.png"},
+{n:"丽婷",g:"♀",s:"鸟",p:"活泼",pf:"元气A型",m:4,d:18,c:"山雀",h:"游戏",st:"优雅、绚丽",co:"黑色、白色",pt:"高",mo:"留得青山在不怕没柴烧",fn:"レイコ(日) Piper(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8f/lyy1idgf70u6nyowt5lifixlwo4fxeh.png"},
+{n:"恰咪",g:"♀",s:"大熊",p:"大姐姐",pf:"大姐姐B型",m:4,d:17,c:"唷咻",h:"健身",st:"活跃、可爱",co:"红色、橙色",pt:"中",mo:"禀性难移",fn:"チャーミー(日) Charlise(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4b/3rb923sgqde5is4t91kh2mm4s28fuct.png"},
+{n:"铁熊",g:"♂",s:"大熊",p:"暴躁",pf:"暴躁A型",m:7,d:1,c:"嗯唔",h:"自然",st:"酷",co:"蓝色、白色",pt:"中",mo:"将空罐放入垃圾箱",fn:"ガンテツ(日) Curt(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7d/icyc1bivjo9jk1txakfj4pw9wpkpeuo.png"},
+{n:"喳喳",g:"♀",s:"鸟",p:"成熟",pf:"成熟B型",m:12,d:4,c:"喳",h:"时尚",st:"优雅、酷",co:"浅蓝色、紫色",pt:"中",mo:"喙是鸟的财富",fn:"パーチク(日) Robin(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a6/47kpe9s2rqwsns95mle0nl7sw8q6ra4.png"},
+{n:"妮雅",g:"♀",s:"大熊",p:"大姐姐",pf:"大姐姐A型",m:1,d:16,c:"呀呐",h:"音乐",st:"简单、可爱",co:"红色、橙色",pt:"高",mo:"天助自助者",fn:"ネーヤ(日) Ursala(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9d/j3pzy8brhh5duoc69254qiuawgu6efs.png"},
+{n:"小雅",g:"♀",s:"食蚁兽",p:"普通",pf:"普通A型",m:2,d:6,c:"优雅",h:"自然",st:"优雅、绚丽",co:"红色、粉色",pt:"中",mo:"久居则安",fn:"みやび(日) Annalisa(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/19/jzi70ru0jxnp9a0v1m937v3y1m2wt7v.png"},
+{n:"李彻",g:"♂",s:"鸟",p:"暴躁",pf:"暴躁A型",m:1,d:27,c:"贯彻",h:"自然",st:"酷",co:"黑色、蓝色",pt:"中",mo:"独断专行",fn:"イッテツ(日) Admiral(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/98/7dcxhxlj3zzk0qd2audj9y8ua7vchio.png"},
+{n:"熊大叔",g:"♂",s:"大熊",p:"自恋",pf:"自恋A型",m:9,d:27,c:"咳咳",h:"教育",st:"优雅",co:"棕色、蓝色",pt:"中",mo:"女士优先",fn:"ベアード(日) Beardo(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/89/m0okhdls60la08yeqwtkjqfbif8wcc8.png"},
+{n:"朝阳",g:"♂",s:"大熊",p:"暴躁",pf:"暴躁B型",m:7,d:22,c:"有喔",h:"健身",st:"酷、绚丽",co:"黑色、白色",pt:"低",mo:"聚沙成塔",fn:"チャウヤン(日) Chow(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0d/0mgqwfkrc3x297y55pxjqalv6lu11b1.png"},
+{n:"凤尾",g:"♂",s:"鸟",p:"悠闲",pf:"悠闲B型",m:3,d:4,c:"如斯",h:"游戏",st:"简单",co:"彩色、橙色",pt:"中",mo:"明日事明日毕",fn:"アンチョビ(日) Anchovy(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/4icwqsjceeke1ft4pcxz9625rwmxuja.png"},
+{n:"穆穆",g:"♂",s:"大熊",p:"暴躁",pf:"暴躁B型",m:7,d:31,c:"熊熊",h:"教育",st:"酷、简单",co:"红色、黑色",pt:"低",mo:"寅吃卯粮",fn:"ムー(日) Grizzly(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2f/2569pwaei3p5mce2x2zn6djize71a3o.png"},
+{n:"安东尼",g:"♂",s:"食蚁兽",p:"自恋",pf:"自恋A型",m:5,d:19,c:"欧啦",h:"教育",st:"优雅、绚丽",co:"黑色、红色",pt:"中",mo:"宝刀未老",fn:"アントニオ(日) Olaf(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0d/h9o092vymv3i9wh7hw3h6zf7f1v3f5o.png"},
+{n:"小酒窝",g:"♀",s:"鸟",p:"普通",pf:"普通B型",m:3,d:12,c:"脸红",h:"教育",st:"可爱、简单",co:"粉色",pt:"中",mo:"情人眼里出西施",fn:"うずまき(日) Midge(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/81/duu89um5g4g80lv7ajxp2a817csqvyp.png"},
+{n:"珍珍",g:"♀",s:"猫",p:"成熟",pf:"成熟B型",m:9,d:30,c:"嗯哼",h:"时尚",st:"绚丽、优雅",co:"紫色、粉色",pt:"中",mo:"姿态是要摆出来的",fn:"ジェーン(日) Monique(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/72/m5qy2ekcw0tbr71z7bch7jgnszrocvq.png"},
+{n:"彭花",g:"♀",s:"猫",p:"活泼",pf:"元气A型",m:2,d:27,c:"看看",h:"音乐",st:"可爱",co:"粉色、红色",pt:"高",mo:"美丽不长久，唯有智慧永恒",fn:"ブーケ(日) Rosie(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cf/rqhd7zebnj9azof94c3mintkr8iywls.png"},
+{n:"周之翔",g:"♂",s:"鸟",p:"运动",pf:"运动A型",m:11,d:20,c:"啁啁",h:"游戏",st:"活跃、简单",co:"绿色、灰色",pt:"高",mo:"鸡毛蒜皮",fn:"ちゅんのすけ(日) Sparro(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2b/obdvd9ffgwg7w10yubgqpoats16kzuz.png"},
+{n:"莎莎",g:"♀",s:"猫",p:"活泼",pf:"元气B型",m:6,d:29,c:"喵嗯",h:"时尚",st:"可爱",co:"粉色、浅蓝色",pt:"高",mo:"笑容让你变得更加可爱",fn:"さっち(日) Merry(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/67/pktjtjer77ubhb6dcflz3uf7vg0zdkn.png"},
+{n:"小玉",g:"♀",s:"猫",p:"成熟",pf:"成熟B型",m:5,d:29,c:"嗯嗯",h:"时尚",st:"酷、优雅",co:"灰色、蓝色",pt:"中",mo:"知足常乐",fn:"たま(日) Purrl(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/86/cvvp33t5np0hnq82tn8336eunitoxa1.png"},
+{n:"大常",g:"♂",s:"牛",p:"运动",pf:"运动A型",m:4,d:29,c:"胡渣",h:"健身",st:"活跃",co:"蓝色、红色",pt:"高",mo:"反面教材",fn:"テッチャン(日) Coach(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9a/6chtxm0j01j8cn31hw3kkvw3v1vfa8h.png"},
+{n:"小虎",g:"♀",s:"猫",p:"活泼",pf:"元气B型",m:8,d:13,c:"喵吼",h:"音乐",st:"活跃、酷",co:"黑色、灰色",pt:"高",mo:"爱情的苹果",fn:"トラこ(日) Tabby(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/73/6vlkez4zljimukn5ckqketa3ofon6sz.png"},
+{n:"奥莉",g:"♀",s:"猫",p:"成熟",pf:"成熟B型",m:2,d:3,c:"什么",h:"音乐",st:"酷、优雅",co:"白色、黑色",pt:"中",mo:"敬人者，人恒敬之",fn:"オリビア(日) Olivia(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c3/8bmpe8jgxlocd9rvuyv95htgo3a5a8j.png"},
+{n:"施万德",g:"♂",s:"牛",p:"暴躁",pf:"暴躁B型",m:4,d:30,c:"呼呼",h:"健身",st:"酷",co:"红色、黑色",pt:"低",mo:"强者落泪时",fn:"セルバンテス(日) Angus(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/22/lxjv0lo1arpefnac9ysddx2fhvyznwr.png"},
+{n:"美佳",g:"♀",s:"猫",p:"活泼",pf:"元气B型",m:3,d:30,c:"哪",h:"时尚",st:"可爱",co:"黄色、橙色",pt:"高",mo:"恋爱之心，人皆有之",fn:"みかっち(日) Felicity(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cd/i4tnpwqpj1r8c587peirpu6sly93swj.png"},
+{n:"仁平",g:"♂",s:"猫",p:"悠闲",pf:"悠闲B型",m:1,d:12,c:"呐",h:"游戏",st:"简单、活跃",co:"黑色、灰色",pt:"中",mo:"天作之合",fn:"ジンペイ(日) Moe(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/31/i47tys2ox8ca7nan78f49cnc8g9wzoz.png"},
+{n:"卢尔曼",g:"♂",s:"牛",p:"暴躁",pf:"暴躁A型",m:12,d:29,c:"哞",h:"健身",st:"酷、活跃",co:"浅蓝色、蓝色",pt:"中",mo:"只要耐心等待，定会时来运转",fn:"ノルマン(日) Vic(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6a/6byp2fok2axzgysg9ohvwjnq9myna86.png"},
+{n:"摔角鸦",g:"♂",s:"鸟",p:"自恋",pf:"自恋A型",m:12,d:12,c:"嘎",h:"健身",st:"活跃、酷",co:"黑色、灰色",pt:"中",mo:"兴趣是最好的老师",fn:"マスカラス(日) Lucha(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/71/sl1zg3z8rb6jzi17ppilwjpn5fu566b.png"},
+{n:"男子汗",g:"♂",s:"猫",p:"运动",pf:"运动B型",m:8,d:17,c:"打啊",h:"健身",st:"活跃、简单",co:"红色、蓝色",pt:"高",mo:"斗争心",fn:"アセクサ(日) Stinky(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/53/6pogjdqiua1x1tnzvvdiwbjfp52qkv5.png"},
+{n:"余子酱",g:"♀",s:"猫",p:"普通",pf:"普通B型",m:10,d:8,c:"酱酱",h:"教育",st:"简单",co:"棕色、米色",pt:"中",mo:"女人心，海底针",fn:"キャビア(日) Kiki(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fe/0hawmivoi75im2daxz09hdyyqonwrxc.png"},
+{n:"罗迪欧",g:"♂",s:"牛",p:"悠闲",pf:"悠闲B型",m:10,d:29,c:"了不起",h:"健身",st:"简单、酷",co:"黑色、红色",pt:"中",mo:"宁为鸡口，无为牛后",fn:"ロデオ(日) Rodeo(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/07/85nu475h8slfwtaxm47fxd4ujfhapy2.png"},
+{n:"柠檬娜",g:"♀",s:"猫",p:"普通",pf:"普通B型",m:3,d:27,c:"娜个",h:"音乐",st:"简单",co:"灰色、粉色",pt:"中",mo:"猫急智生",fn:"ラムネ(日) Lolly(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c3/7d99fi1m321r7uqh4ynjemfvmcdhn5f.png"},
+{n:"戈伍纪",g:"♂",s:"猫",p:"暴躁",pf:"暴躁B型",m:11,d:29,c:"咦唷",h:"音乐",st:"简单",co:"紫色、红色",pt:"低",mo:"一声二颜三姿态",fn:"かぶきち(日) Kabuki(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/37/tn2whour3unzy1cs0qwkcqpo9bajahq.png"},
+{n:"阿判",g:"♂",s:"猫",p:"悠闲",pf:"悠闲B型",m:1,d:1,c:"猫猫",h:"游戏",st:"简单、可爱",co:"彩色、红色",pt:"中",mo:"猫有九条命",fn:"ニコバン(日) Bob(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fd/mrpv91b59t0faao3ajelo22ybzju2h1.png"},
+{n:"赵奇",g:"♂",s:"鸟",p:"自恋",pf:"自恋A型",m:6,d:22,c:"唷唷唷",h:"音乐",st:"酷、简单",co:"绿色、黑色",pt:"中",mo:"草木知威",fn:"ジョッキー(日) Jacques(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cf/565gkqkt79ynxqh784djljoare1sh42.png"},
+{n:"朱古莉",g:"♀",s:"猫",p:"成熟",pf:"成熟B型",m:2,d:15,c:"古古",h:"时尚",st:"优雅、绚丽",co:"绿色、灰色",pt:"中",mo:"免配送费",fn:"ショコラ(日) Kitty(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/40/69qnhd2ykyiu4ffwsvgwxbtghgv7ew1.png"},
+{n:"纯纯",g:"♀",s:"猫",p:"活泼",pf:"元气B型",m:6,d:17,c:"蜜柑",h:"音乐",st:"简单、可爱",co:"绿色、黄色",pt:"低",mo:"100%鲜榨果汁",fn:"ヒャクパー(日) Tangy(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fa/c9bkzzwegn1aivwocvx1ciag63huhid.png"},
+{n:"毛乐时",g:"♂",s:"牛",p:"悠闲",pf:"悠闲A型",m:4,d:20,c:"奔驰",h:"自然",st:"简单",co:"棕色、米色",pt:"中",mo:"随着牛的成长，鼻孔也会变大",fn:"モーリス(日) Stu(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f5/ezhh3zv7rwqn9a7iplt1cjf8sj1sn0e.png"},
+{n:"艳后",g:"♀",s:"猫",p:"成熟",pf:"成熟B型",m:9,d:22,c:"尼罗",h:"自然",st:"绚丽、简单",co:"彩色、棕色",pt:"中",mo:"适得其反",fn:"ナイル(日) Ankha(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/39/0qk07h279fy7r5gxi7gz9bnzwck22tc.png"},
+{n:"阿一",g:"♂",s:"猫",p:"运动",pf:"运动B型",m:8,d:1,c:"喝",h:"健身",st:"活跃、简单",co:"红色",pt:"高",mo:"必杀技",fn:"１ごう(日) Kid Cat(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/dc/hjv0riyqct10xo1fieojpnscxkerhhh.png"},
+{n:"圆圆",g:"♀",s:"猫",p:"普通",pf:"普通B型",m:9,d:25,c:"喵",h:"教育",st:"简单",co:"棕色、米色",pt:"中",mo:"贵猫多忘事",fn:"マール(日) Mitzi(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d5/if6m85xq870gov60x2cd466yhwm5vs1.png"},
+{n:"文雄",g:"♂",s:"鸟",p:"运动",pf:"运动A型",m:7,d:25,c:"噗噗",h:"游戏",st:"简单、活跃",co:"米色、红色",pt:"高",mo:"笼中之鸟",fn:"ふみたろう(日) Peck(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/85/kifvkn4d05id5j3w47sqj05kyeeldyk.png"},
+{n:"阿邦",g:"♂",s:"猫",p:"暴躁",pf:"暴躁B型",m:12,d:10,c:"切/关节",h:"教育",st:"酷、简单",co:"黑色、灰色",pt:"低",mo:"必杀技是猫猫拳",fn:"バンタム(日) Tom(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b0/fzck20tr0fq4vghr32fdftjwjaj7ztv.png"},
+{n:"尔光",g:"♂",s:"猫",p:"悠闲",pf:"悠闲B型",m:4,d:11,c:"晃晃",h:"游戏",st:"简单",co:"蓝色、浅蓝色",pt:"中",mo:"有人打你的右脸，连左脸也转过来由他打",fn:"ビンタ(日) Punchy(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/88/ixudoc3lyluzyinsezw8ncbncfg7dtb.png"},
+{n:"罗宋",g:"♂",s:"牛",p:"暴躁",pf:"暴躁B型",m:5,d:20,c:"是呗",h:"教育",st:"酷、简单",co:"蓝色、黑色",pt:"低",mo:"牛耕田，马吃谷",fn:"ボルシチ(日) T-Bone(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/63/pr7jen0xri93cwywxohddv30jxq1q2t.png"},
+{n:"咏旋",g:"♀",s:"鸡",p:"成熟",pf:"成熟B型",m:12,d:9,c:"哈雷路亚",h:"音乐",st:"绚丽、优雅",co:"紫色、粉色",pt:"中",mo:"中看不中用",fn:"アリア(日) Becky(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a6/rj09p189d8jada21ghlhoj2thg6qhwg.png"},
+{n:"佳敏",g:"♀",s:"小熊",p:"普通",pf:"普通B型",m:5,d:18,c:"佳佳",h:"自然",st:"优雅、可爱",co:"红色、米色",pt:"中",mo:"以柔克刚",fn:"ジャスミン(日) Pekoe(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/93/pxhkzjrtmbjm7hv8fwhdbrf03zk1gid.png"},
+{n:"蓬蓬",g:"♂",s:"小熊",p:"运动",pf:"运动B型",m:1,d:2,c:"萌",h:"健身",st:"简单",co:"橙色、黄色",pt:"高",mo:"幸运来自于勇敢",fn:"ポンチョ(日) Poncho(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2b/kbs48eg2l0l8j05xkdqsfw7bh4n9qof.png"},
+{n:"阿排",g:"♀",s:"奶牛",p:"活泼",pf:"元气B型",m:5,d:10,c:"牟",h:"时尚",st:"简单、可爱",co:"橙色、红色",pt:"高",mo:"不说谁知道",fn:"カルピ(日) Patty(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/ohr2rpaqcd4rezm6x25q3arjjcys7n2.png"},
+{n:"玛丁(三丽鸥联动)",g:"♂",s:"小熊",p:"悠闲",pf:"悠闲A型",m:4,d:16,c:"布丁",h:"游戏",st:"可爱、优雅",co:"棕色、黄色",pt:"",mo:"Just wait until I get started!",fn:"マーティー(日) Marty(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/12/olpc19u79aq6036oyyllxq4r0pqqtjs.png"},
+{n:"肯肯",g:"♂",s:"鸡",p:"运动",pf:"运动B型",m:10,d:4,c:"咕咕",h:"健身",st:"简单、活跃",co:"蓝色、白色",pt:"高",mo:"无利不起早",fn:"ケンタ(日) Goose(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c1/2o2pfw91po4usgi8im68sah5ejxq9dm.png"},
+{n:"宪雄",g:"♂",s:"小熊",p:"暴躁",pf:"暴躁A型",m:12,d:29,c:"罢了",h:"教育",st:"简单、酷",co:"蓝色、白色",pt:"中",mo:"钱多事更多",fn:"のりお(日) Murphy(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/11/oorndymygs7qo94x27bnsmqt7qdnzcq.png"},
+{n:"巧巧",g:"♀",s:"猫",p:"大姐姐",pf:"大姐姐A型",m:4,d:27,c:"掰掰",h:"音乐",st:"酷",co:"紫色、黑色",pt:"高",mo:"耳濡目染",fn:"ちょい(日) Katt(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f5/41t4355ooxnkjs5hj1h11txy8e9q7jn.png"},
+{n:"帕塔雅",g:"♀",s:"鸡",p:"大姐姐",pf:"大姐姐A型",m:10,d:12,c:"泰泰",h:"游戏",st:"酷、简单",co:"浅蓝色、黄色",pt:"高",mo:"雁过无痕",fn:"パタヤ(日) Plucky(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f5/6s2hmd0wsdncj8qkhx02etqw5nobgvi.png"},
+{n:"胖达",g:"♂",s:"小熊",p:"悠闲",pf:"悠闲B型",m:8,d:6,c:"竹子",h:"游戏",st:"简单",co:"黄色、绿色",pt:"中",mo:"等待是最美妙的时光",fn:"パンタ(日) Chester(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2c/g584sd7pval1beky8nkwrlvbto9x8ay.png"},
+{n:"阿钦",g:"♂",s:"小熊",p:"悠闲",pf:"悠闲B型",m:6,d:11,c:"真是的",h:"游戏",st:"简单",co:"绿色、蓝色",pt:"中",mo:"天下没有免费的午饭",fn:"きんぞう(日) Pudge(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e5/dbh14ywrx6dakxx0xh7lrv99r30idu4.png"},
+{n:"沛希",g:"♂",s:"鸡",p:"悠闲",pf:"悠闲B型",m:10,d:10,c:"好棒",h:"游戏",st:"简单",co:"蓝色、紫色",pt:"中",mo:"杯弓蛇影",fn:"ぺしみち(日) Benedict(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/22/ewmm6ba71xi8prb32lkgsnzzscahfd3.png"},
+{n:"毕克萝",g:"♀",s:"小熊",p:"普通",pf:"普通A型",m:7,d:12,c:"马克杯",h:"自然",st:"简单",co:"棕色、黄色",pt:"中",mo:"人心不足蛇吞象",fn:"ピッコロ(日) Olive(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cc/629ff1uvi60pnrntbmlo2nimzyz0ew7.png"},
+{n:"杰克",g:"♂",s:"猫",p:"自恋",pf:"自恋B型",m:10,d:1,c:"严肃",h:"自然",st:"优雅、酷",co:"黑色、灰色",pt:"高",mo:"自有品牌",fn:"ジャック(日) Raymond(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bc/p9aoiubbogoydvba1lnyftutmkf2ck7.png"},
+{n:"金阁",g:"♂",s:"鸡",p:"暴躁",pf:"暴躁B型",m:11,d:23,c:"等待",h:"教育",st:"优雅、绚丽",co:"棕色、红色",pt:"低",mo:"尽人事，听天命",fn:"キンカク(日) Knox(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/63/s5i5oriz69pozztqx31wupynoihh6pj.png"},
+{n:"阿西",g:"♂",s:"小熊",p:"悠闲",pf:"悠闲A型",m:3,d:2,c:"算了",h:"游戏",st:"简单、酷",co:"黄色、黑色",pt:"中",mo:"有名无实",fn:"ニッシー(日) Barold(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8e/ru4b74i2ibkthnc3nevpa2plcaulepl.png"},
+{n:"艾德豪",g:"♂",s:"小熊",p:"运动",pf:"运动B型",m:9,d:28,c:"精神",h:"健身",st:"活跃、简单",co:"彩色、白色",pt:"高",mo:"产地直送",fn:"アイダホ(日) Kody(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/7s4cbpguae80z6xktuce9k32g1kgkpv.png"},
+{n:"黄金鸡",g:"♂",s:"鸡",p:"悠闲",pf:"悠闲B型",m:10,d:14,c:"很优",h:"游戏",st:"简单",co:"米色、棕色",pt:"中",mo:"无知者无畏",fn:"しもやけ(日) Egbert(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e1/o1rvyqdbfqev4t4e9mi6y17b59b1pw8.png"},
+{n:"樱桃",g:"♀",s:"小熊",p:"活泼",pf:"元气B型",m:3,d:17,c:"开玩笑的",h:"时尚",st:"简单、可爱",co:"黄色、浅蓝色",pt:"高",mo:"小小一粒山椒也辣劲十足",fn:"アセロラ(日) Cheri(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/76/fmvygkzkoahgrx1hfnmmf4tk1fkx6vo.png"},
+{n:"娃娃",g:"♀",s:"小熊",p:"活泼",pf:"元气B型",m:6,d:24,c:"怦怦",h:"时尚",st:"可爱、简单",co:"白色、蓝色",pt:"高",mo:"糖果让世界甜美",fn:"グルミン(日) Bluebear(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4a/42y0oixbjcr3033iov58pfjop8p2i5k.png"},
+{n:"凯西",g:"♀",s:"鸡",p:"成熟",pf:"成熟A型",m:10,d:24,c:"咯咯",h:"音乐",st:"绚丽、优雅",co:"黑色、红色",pt:"低",mo:"九死一生",fn:"カサンドラ(日) Broffina(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7e/awj7kx6aqiuoventjw1w3qu7imv1f9n.png"},
+{n:"然姐",g:"♀",s:"小熊",p:"大姐姐",pf:"大姐姐A型",m:6,d:23,c:"竟然说",h:"游戏",st:"酷、活跃",co:"红色、紫色",pt:"高",mo:"孝顺要趁早",fn:"アネッサ(日) Tammy(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/79/1erfp6xljbqj2r349ytevmgz7kcw0ax.png"},
+{n:"玩具熊",g:"♂",s:"小熊",p:"悠闲",pf:"悠闲B型",m:2,d:10,c:"玩玩",h:"游戏",st:"简单、可爱",co:"彩色、白色",pt:"中",mo:"跌跌撞撞的人生",fn:"パッチ(日) Stitches(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/57/krd6ijg6345xqm9a1ilsygbbuoj563b.png"},
+{n:"陶米咕",g:"♀",s:"鸡",p:"普通",pf:"普通B型",m:4,d:28,c:"是唷",h:"音乐",st:"优雅、可爱",co:"红色、灰色",pt:"中",mo:"早睡早起身体好",fn:"ドミグラ(日) Ava(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/79/njojjwcfp6y5npyyfn8n34ulun4d75j.png"},
+{n:"阿妹",g:"♀",s:"小熊",p:"普通",pf:"普通A型",m:5,d:21,c:"有耶",h:"自然",st:"可爱、简单",co:"白色、红色",pt:"中",mo:"世外桃源梦中见",fn:"メイ(日) June(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/aa/1z17qp0484s064hmfx6mz7o0zg5syfg.png"},
+{n:"小枫",g:"♀",s:"小熊",p:"普通",pf:"普通B型",m:6,d:15,c:"熊仔",h:"教育",st:"简单、可爱",co:"米色、绿色",pt:"中",mo:"谁知盘中餐，粒粒皆辛苦",fn:"メープル(日) Maple(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/45/qgwupkiydqtssk9lcb20u4vqnhvwcuw.png"},
+{n:"乌骨鸡",g:"♂",s:"鸡",p:"自恋",pf:"自恋A型",m:12,d:23,c:"骨鸡",h:"教育",st:"酷、简单",co:"紫色、蓝色",pt:"中",mo:"入乡随俗",fn:"クロベエ(日) Ken(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/78/rqqnwch9yd2ty1fzsz3axw9b7eqpfr1.png"},
+{n:"美玲",g:"♀",s:"小熊",p:"成熟",pf:"成熟A型",m:3,d:10,c:"哎呀",h:"音乐",st:"可爱、优雅",co:"粉色、白色",pt:"低",mo:"梦中可以为所欲为",fn:"みすず(日) Judy(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/49/59o34z38jeoh43oocsdifo0kgm7mvne.png"},
+{n:"嘉弼",g:"♂",s:"小熊",p:"暴躁",pf:"暴躁B型",m:8,d:2,c:"唉唷",h:"游戏",st:"简单、酷",co:"黄色、彩色",pt:"低",mo:"祸不单行",fn:"ガビ(日) Vladimir(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f7/pguy9t7oidqq3a8ck4ztwbnr9vanjqz.png"},
+{n:"茶茶",g:"♂",s:"猫",p:"运动",pf:"运动A型",m:12,d:20,c:"之类的",h:"游戏",st:"活跃、简单",co:"黄色、米色",pt:"高",mo:"路见不平，猫爪相助",fn:"チャス(日) Rudy(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/40/rb53l2onglw3tdaljd6tb5mcy0xaw3x.png"},
+{n:"傅兰",g:"♀",s:"狗",p:"成熟",pf:"成熟B型",m:10,d:25,c:"屋屋",h:"时尚",st:"优雅、绚丽",co:"紫色、黑色",pt:"中",mo:"薄幸佳人",fn:"ブレンダ(日) Portia(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/64/pkk961x0ti463ie3pqs2cejb7z6mnp1.png"},
+{n:"彼得",g:"♂",s:"鹿",p:"悠闲",pf:"悠闲A型",m:4,d:5,c:"怎么办",h:"自然",st:"简单、可爱",co:"米色、橙色",pt:"中",mo:"未来的事只有老天才知道",fn:"ペーター(日) Beau(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/5a/h8kt1ys4tvp003qwdg2vecwqnhu3ryp.png"},
+{n:"爱莉",g:"♀",s:"鳄鱼",p:"普通",pf:"普通A型",m:5,d:17,c:"鳄莉",h:"自然",st:"可爱",co:"粉色、白色",pt:"中",mo:"以和为贵",fn:"アリゲッティ(日) Gayle(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c5/p02xrv5yfa83gy7fcjbfe31052tf9zv.png"},
+{n:"约翰",g:"♂",s:"狗",p:"暴躁",pf:"暴躁B型",m:11,d:1,c:"侬",h:"音乐",st:"酷、简单",co:"蓝色、灰色",pt:"低",mo:"睡眠也算工作",fn:"ジョン(日) Butch(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/73/1oa52oeepp82avwver9j2l7e5odm4sn.png"},
+{n:"布鹿斯",g:"♂",s:"鹿",p:"暴躁",pf:"暴躁A型",m:5,d:26,c:"福鹿寿",h:"自然",st:"酷、简单",co:"黑色、红色",pt:"中",mo:"同坐一条船",fn:"ブルース(日) Bruce(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/36/asfugf4649czmqigm5axpivuuwwcxn8.png"},
+{n:"鳄罗思",g:"♀",s:"鳄鱼",p:"成熟",pf:"成熟B型",m:11,d:8,c:"鳄鱼皮",h:"时尚",st:"绚丽、优雅",co:"黄色、棕色",pt:"中",mo:"以口量心",fn:"クロコ(日) Alli(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a6/k9vn3t655a4ki632nxmhdo27ufb61wm.png"},
+{n:"阿笨",g:"♂",s:"狗",p:"悠闲",pf:"悠闲B型",m:6,d:10,c:"咆",h:"游戏",st:"简单",co:"橙色、红色、黑色",pt:"中",mo:"不动如山",fn:"ベン(日) Walker(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f0/gey80ieaqvjn87z5ggw25pqb4iji2xm.png"},
+{n:"倪家莉",g:"♀",s:"鹿",p:"成熟",pf:"成熟A型",m:1,d:4,c:"是吧",h:"教育",st:"优雅、绚丽",co:"紫色、粉色",pt:"低",mo:"改过自新",fn:"ナタリー(日) Diana(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3a/t6cqbgbl3mkasxw9thy0n11pifltfvm.png"},
+{n:"阿龙",g:"♂",s:"鳄鱼",p:"悠闲",pf:"悠闲A型",m:2,d:12,c:"然后",h:"自然",st:"优雅、绚丽",co:"橙色、红色",pt:"中",mo:"鱼跃龙门",fn:"タツオ(日) Drago(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/62/m20ph316j0abpi5pohpzkjj8hsunec8.png"},
+{n:"牧牧",g:"♀",s:"奶牛",p:"成熟",pf:"成熟B型",m:8,d:25,c:"牛奶",h:"时尚",st:"绚丽、可爱",co:"彩色、粉色",pt:"中",mo:"进寸退尺",fn:"まきば(日) Tipper(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c5/los096pej03ac0g5uet1gx3ygxjvjth.png"},
+{n:"大吉",g:"♂",s:"狗",p:"悠闲",pf:"悠闲B型",m:11,d:4,c:"大概",h:"游戏",st:"简单",co:"米色、白色",pt:"中",mo:"赌场得意，情场失意",fn:"ラッキー(日) Lucky(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e5/h5cyjbl7jhiu8h20dfe2usem23sccje.png"},
+{n:"娣雅",g:"♀",s:"鹿",p:"大姐姐",pf:"大姐姐A型",m:5,d:4,c:"随便啦",h:"游戏",st:"简单",co:"橙色",pt:"高",mo:"纤纤玉足",fn:"ナディア(日) Deirdre(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3a/j3t4objv0xf9sgth4nzssuwgkttr3ai.png"},
+{n:"丰年",g:"♂",s:"鳄鱼",p:"运动",pf:"运动A型",m:8,d:7,c:"跳",h:"游戏",st:"绚丽、活跃",co:"彩色、紫色",pt:"高",mo:"肱二头肌",fn:"ホウサク(日) Boots(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8d/aoiv1wyxdmzlqwqgkn6fy1s1dzork66.png"},
+{n:"香草",g:"♀",s:"狗",p:"普通",pf:"普通B型",m:11,d:16,c:"对不对",h:"教育",st:"简单、可爱",co:"彩色、蓝色",pt:"中",mo:"实践出真知",fn:"バニラ(日) Daisy(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c7/nlarmnzsa5h1805mic8gfbeqt9avr7h.png"},
+{n:"查克",g:"♂",s:"鹿",p:"悠闲",pf:"悠闲A型",m:7,d:27,c:"鹿鹿",h:"自然",st:"简单",co:"米色、红色",pt:"中",mo:"失败是成功之母",fn:"チャック(日) Erik(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/07/elj9cy38mxqthmkliwahjd5k3ca0c61.png"},
+{n:"音音",g:"♀",s:"鹿",p:"普通",pf:"普通A型",m:3,d:26,c:"小鹿",h:"自然",st:"简单、可爱",co:"米色、白色",pt:"中",mo:"万里之行始于足下",fn:"ドレミ(日) Fauna(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9a/5pxemeyv8o2mywwf6k6aresy6f9oec1.png"},
+{n:"晨曦",g:"♀",s:"奶牛",p:"普通",pf:"普通A型",m:9,d:20,c:"微笑",h:"自然",st:"可爱、简单",co:"白色、浅蓝色",pt:"中",mo:"金窝银窝不如自己的草窝",fn:"いさこ(日) Norma(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9a/7txfdb2hqjhxepvr769nyqrbocykhr4.png"},
+{n:"罗宾",g:"♂",s:"狗",p:"悠闲",pf:"悠闲B型",m:5,d:13,c:"狗狗",h:"游戏",st:"绚丽、简单",co:"紫色、彩色",pt:"中",mo:"耳听为虚，眼见为实",fn:"ロビン(日) Biskit(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/62/7ed8zmjxsg5hg956giatowj87wcdwl3.png"},
+{n:"汤姆",g:"♂",s:"鹿",p:"自恋",pf:"自恋A型",m:8,d:20,c:"变了",h:"教育",st:"绚丽",co:"灰色",pt:"中",mo:"逐兽者，目不见太山",fn:"トムソン(日) Lopez(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c6/ij7ucye1q5gqm2eb2n0qdz2aqmjdjpe.png"},
+{n:"大和",g:"♂",s:"鳄鱼",p:"暴躁",pf:"暴躁B型",m:5,d:27,c:"噗咻",h:"健身",st:"酷、简单",co:"蓝色、白色",pt:"低",mo:"只见树木不见森林",fn:"ヤマト(日) Del(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a9/4plpg3r25lok9wp90jefc7zirzd9m1w.png"},
+{n:"雀儿喜(三丽鸥联动)",g:"♀",s:"鹿",p:"普通",pf:"普通A型",m:1,d:18,c:"喜喜",h:"游戏",st:"可爱、华丽",co:"粉红色、白色",pt:"",mo:"Always look a gift horse in the mouth.",fn:"チェルシー(日) Chelsea(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f8/e9vxl2867bsvvtd9jl90811yeqne5ot.png"},
+{n:"小健",g:"♂",s:"鹿",p:"运动",pf:"运动A型",m:11,d:7,c:"梅花",h:"游戏",st:"活跃、简单",co:"绿色、棕色",pt:"高",mo:"三十六计走为上计",fn:"タケル(日) Bam(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d0/en26uvg5lcgznlcdpssf8athod4njzk.png"},
+{n:"玉兰",g:"♀",s:"奶牛",p:"成熟",pf:"成熟A型",m:2,d:28,c:"这样很好",h:"时尚",st:"优雅、绚丽",co:"彩色、紫色",pt:"低",mo:"泡沫时代",fn:"ハナコ(日) Naomi(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2c/ebkklcmpn60qx771gc2ron2pte0udvd.png"},
+{n:"阿富",g:"♂",s:"狗",p:"悠闲",pf:"悠闲B型",m:8,d:4,c:"对吧",h:"游戏",st:"简单、可爱",co:"米色、棕色",pt:"中",mo:"愚者只看结果，智者究其原因",fn:"トミ(日) Bones(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2f/3rn7954x4mvss7pat62sg2unwuoorhm.png"},
+{n:"洁西卡",g:"♀",s:"鹿",p:"大姐姐",pf:"大姐姐A型",m:9,d:19,c:"西卡",h:"音乐",st:"酷",co:"粉色",pt:"高",mo:"骂人笨蛋者才是笨蛋",fn:"ジェシカ(日) Fuchsia(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e8/0ix0qskel080j2d0gsq5bbx4cndv62q.png"},
+{n:"海德",g:"♂",s:"鳄鱼",p:"运动",pf:"运动A型",m:11,d:15,c:"唰唰",h:"游戏",st:"酷、简单",co:"棕色、绿色",pt:"高",mo:"揭穿假面具",fn:"ハイド(日) Sly(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c1/0o9yg767srogxentjkgaw1fy9at2944.png"},
+{n:"牛奶糖",g:"♀",s:"狗",p:"普通",pf:"普通B型",m:12,d:27,c:"汪",h:"自然",st:"简单、可爱",co:"黄色、橙色",pt:"中",mo:"恰到好处的幸福才是最棒的",fn:"キャラメル(日) Goldie(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/ce/ncohbzaiiu4qyfcdfpmd15v44jfl2et.png"},
+{n:"森森",g:"♂",s:"鹿",p:"自恋",pf:"自恋A型",m:6,d:7,c:"鹿营",h:"音乐",st:"酷、绚丽",co:"紫色、灰色",pt:"中",mo:"傻得可爱",fn:"ネルソン(日) Zell(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/93/natub9hc3xt4duqxedgq5l8ieogc0ej.png"},
+{n:"阿泥",g:"♂",s:"鳄鱼",p:"悠闲",pf:"悠闲B型",m:6,d:9,c:"鳄泥",h:"游戏",st:"简单",co:"红色、蓝色",pt:"中",mo:"多睡的孩子长得快",fn:"アルベルト(日) Alfonso(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4e/jel0bechyn4kcyo3gva5z73k952x0nm.png"},
+{n:"莎莉",g:"♀",s:"象",p:"普通",pf:"普通B型",m:1,d:28,c:"莎啦啦",h:"教育",st:"可爱、优雅",co:"粉色、红色",pt:"中",mo:"一白遮三丑",fn:"サリー(日) Margie(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e8/kcf5gxv1cer96mcd7x5i7yjx3fbuy0s.png"},
+{n:"米兰达",g:"♀",s:"鸭",p:"成熟",pf:"成熟B型",m:4,d:23,c:"怎么回事",h:"时尚",st:"优雅、绚丽",co:"蓝色、紫色",pt:"中",mo:"严以律己，宽以待人",fn:"ミランダ(日) Miranda(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9e/4mtumgv3tk4s0jc0v5sqpqvb7pdh08z.png"},
+{n:"安妮",g:"♀",s:"鸭",p:"成熟",pf:"成熟B型",m:4,d:8,c:"叹",h:"时尚",st:"酷、简单",co:"粉色、白色",pt:"中",mo:"每天无忧无虑的只有愚人",fn:"アンヌ(日) Maelle(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e3/rudqvvjnugkofh1pyzz39xcwumaxubm.png"},
+{n:"贝果",g:"♀",s:"狗",p:"普通",pf:"普通A型",m:10,d:15,c:"宾果",h:"自然",st:"简单、酷",co:"浅蓝色、绿色",pt:"中",mo:"阴盛阳衰",fn:"ベーグル(日) Bea(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6a/7fkncsb4i3xamph092sys0qfzlp8pem.png"},
+{n:"露露",g:"♀",s:"象",p:"成熟",pf:"成熟B型",m:1,d:20,c:"勇",h:"时尚",st:"优雅、酷",co:"黑色、橙色",pt:"中",mo:"大材小用",fn:"オパール(日) Opal(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6f/ejx84zeqk8j32v9isbm48uvqso4mytq.png"},
+{n:"阿坊",g:"♂",s:"鸭",p:"悠闲",pf:"悠闲B型",m:5,d:25,c:"喂！妈妈",h:"游戏",st:"简单、优雅",co:"黄色、米色",pt:"中",mo:"不谙世事，高枕无忧",fn:"ボン(日) Derwin(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9d/1sgr0325r11bj3kzvxlctwk6ffnnkwu.png"},
+{n:"包伯",g:"♂",s:"狗",p:"自恋",pf:"自恋A型",m:11,d:24,c:"汪想想",h:"教育",st:"简单、酷",co:"浅蓝色、蓝色",pt:"中",mo:"高枕无忧",fn:"ボブ(日) Shep(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4e/2qmjbec3fyus66lhtq8e8rkuyksmkuv.png"},
+{n:"番茄酱",g:"♀",s:"鸭",p:"活泼",pf:"元气A型",m:7,d:27,c:"噗吱",h:"游戏",st:"可爱",co:"浅蓝色、白色",pt:"高",mo:"每天一个苹果，医生远离我",fn:"ケチャップ(日) Ketchup(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f4/oqjj7wie25t3bael1ksqs5fsqqnw60i.png"},
+{n:"球藻",g:"♀",s:"鸭",p:"普通",pf:"普通B型",m:6,d:27,c:"球球",h:"教育",st:"简单、可爱",co:"彩色、蓝色",pt:"中",mo:"回忆如潮水涌来",fn:"まりも(日) Deena(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/61/sde917jaliz3hf9ucags25ak6sgmbuc.png"},
+{n:"金牌",g:"♂",s:"狗",p:"运动",pf:"运动B型",m:11,d:11,c:"摘",h:"健身",st:"活跃、酷",co:"红色、黑色",pt:"高",mo:"抬腿不踢摇尾狗",fn:"チャンプ(日) Mac(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a5/hyeh649whoqz0ignmkq0ess9voifovo.png"},
+{n:"巨巨",g:"♂",s:"象",p:"悠闲",pf:"悠闲B型",m:7,d:14,c:"象象",h:"游戏",st:"简单",co:"黄色、蓝色",pt:"中",mo:"喂象者不畏象",fn:"ヒュージ(日) Dizzy(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/88/55hk86r706wgjzal0f1zu1u196yvxl2.png"},
+{n:"肥肝",g:"♂",s:"鸭",p:"悠闲",pf:"悠闲B型",m:6,d:25,c:"或许鸭",h:"游戏",st:"酷、简单",co:"棕色、红色",pt:"中",mo:"满汉全席",fn:"フォアグラ(日) Drake(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/71/psmk0thlcucjs7bue6t5zi38uda24tp.png"},
+{n:"皮蛋",g:"♂",s:"鸭",p:"运动",pf:"运动A型",m:2,d:1,c:"蛋是啊",h:"游戏",st:"活跃",co:"蓝色、紫色",pt:"高",mo:"春江水暖鸭先知",fn:"ピータン(日) Bill(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/71/aa9fu7fnkxl3giytnfshy4zdjem1adw.png"},
+{n:"素返真",g:"♀",s:"鸭",p:"成熟",pf:"成熟B型",m:8,d:12,c:"相反",h:"时尚",st:"绚丽、优雅",co:"黑色、灰色",pt:"中",mo:"时间就是金钱",fn:"スワンソン(日) Gloria(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4c/g2qz3vp03s1stckr8bw01wljz5wtldw.png"},
+{n:"海苔裴",g:"♀",s:"鸭",p:"活泼",pf:"元气B型",m:2,d:11,c:"裴裴",h:"音乐",st:"可爱、简单",co:"粉色、浅蓝色",pt:"高",mo:"小身体大食量",fn:"のりっぺ(日) Pompom(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e4/6skh9jx5x5dvc2l9ohcb5q3pbqdxsea.png"},
+{n:"文字烧",g:"♂",s:"狗",p:"悠闲",pf:"悠闲B型",m:12,d:31,c:"什么字",h:"游戏",st:"简单、酷",co:"绿色、蓝色",pt:"中",mo:"出门在外，不怕丢丑",fn:"もんじゃ(日) Marcel(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/92/kmze66ykg1f6c4bkggi9jqif41vuaet.png"},
+{n:"阿三",g:"♂",s:"象",p:"悠闲",pf:"悠闲B型",m:10,d:3,c:"哈啊",h:"游戏",st:"简单、活跃",co:"绿色",pt:"中",mo:"还要更多的咖喱！",fn:"３ごう(日) Big Top(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a4/ai1cm3xmxuld41frz7vwaqz41vyjdij.png"},
+{n:"阿守",g:"♂",s:"鸭",p:"运动",pf:"运动B型",m:6,d:13,c:"呱呱",h:"健身",st:"活跃、简单",co:"米色、蓝色",pt:"高",mo:"小心路旁",fn:"マモル(日) Scoot(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7f/bzpikocio5973d6q1mcj9ouumcvvr5w.png"},
+{n:"李察",g:"♂",s:"鸭",p:"悠闲",pf:"悠闲B型",m:1,d:3,c:"鸭鸭",h:"游戏",st:"简单",co:"绿色、蓝色",pt:"中",mo:"普天之下莫非王土",fn:"リチャード(日) Joey(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/dd/bu8r96la1xkf0ex4o6l0b8kzisbt0o2.png"},
+{n:"珮琳",g:"♀",s:"狗",p:"活泼",pf:"元气B型",m:6,d:18,c:"琳琳",h:"时尚",st:"可爱",co:"绿色、浅蓝色",pt:"高",mo:"理所当然",fn:"ペリーヌ(日) Cookie(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/54/fz3v3xwnbylo5qv1i6kczupfiwzot1g.png"},
+{n:"亚美",g:"♀",s:"鸭",p:"普通",pf:"普通A型",m:3,d:7,c:"说不定鸭",h:"自然",st:"可爱、简单",co:"黄色、粉色",pt:"中",mo:"事不宜迟",fn:"カモミ(日) Molly(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/62/3dnh0d2eiuwv528wbn5dn4punieqrpl.png"},
+{n:"苏米",g:"♀",s:"鸭",p:"成熟",pf:"成熟B型",m:11,d:17,c:"八十八",h:"时尚",st:"酷、绚丽",co:"蓝色、白色",pt:"中",mo:"龙生龙，凤生凤",fn:"スミモモ(日) Mallary(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/36/ken3f6k8t384dakj94me6336iqhiyf1.png"},
+{n:"小八",g:"♂",s:"狗",p:"悠闲",pf:"悠闲A型",m:8,d:3,c:"那么那么",h:"自然",st:"简单",co:"红色、白色",pt:"中",mo:"清官难断家务事",fn:"ハチ(日) Benjamin(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f1/sb1lxz2m1dgvs9p1vgshluqctcfsd5d.png"},
+{n:"艾勒芬",g:"♀",s:"象",p:"成熟",pf:"成熟B型",m:12,d:8,c:"鲁鲁",h:"时尚",st:"优雅、简单",co:"绿色、橙色",pt:"中",mo:"只要结果好那就是好",fn:"エレフィン(日) Eloise(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d0/rckuejj2qk0qebtyn6ve4pt2j70e3vm.png"},
+{n:"卿德",g:"♂",s:"鸭",p:"悠闲",pf:"悠闲A型",m:6,d:30,c:"唧唧",h:"自然",st:"酷、简单",co:"蓝色、黑色",pt:"中",mo:"丑小鸭也会变天鹅",fn:"アチョット(日) Weber(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d2/azej7e6senhkr9vgx39jttqh0qid2a8.png"},
+{n:"爱哭鬼",g:"♀",s:"鸭",p:"活泼",pf:"元气B型",m:2,d:23,c:"呜呜",h:"时尚",st:"简单、可爱",co:"黄色、白色",pt:"高",mo:"知人知面不知心",fn:"ナッキー(日) Pate(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/ba/qv8k4badavn0tnhdvfp9wwiodvl99f8.png"},
+{n:"麻蓉",g:"♀",s:"狗",p:"活泼",pf:"元气A型",m:1,d:11,c:"一二",h:"游戏",st:"简单、可爱",co:"紫色、粉色",pt:"高",mo:"IT革新",fn:"マロン(日) Maddie(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bb/crmicitqddd7bku2auo4bbirqpmpwje.png"},
+{n:"何童",g:"♂",s:"鸭",p:"自恋",pf:"自恋A型",m:12,d:22,c:"说真的",h:"音乐",st:"优雅、酷",co:"米色、橙色",pt:"中",mo:"晚上不睡，早上不起",fn:"タックン(日) Quillson(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/98/m7zhhg7uma7i0c1r2d8lerhf74gxemj.png"},
+{n:"小鲔",g:"♀",s:"鸭",p:"活泼",pf:"元气B型",m:2,d:19,c:"鱼鱼",h:"时尚",st:"简单、可爱",co:"绿色、彩色",pt:"高",mo:"爱能创造奇迹",fn:"マグロ(日) Freckles(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e7/mnv0xywskylaa8f5qbh6chbflse5xx4.png"},
+{n:"花娜",g:"♀",s:"狗",p:"大姐姐",pf:"大姐姐A型",m:5,d:11,c:"听说娜",h:"音乐",st:"酷、优雅",co:"黑色、紫色",pt:"高",mo:"十八无丑女",fn:"ハンナ(日) Cherry(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0b/7s6wdk5ku9g1rzivn6k866c06ifa0xa.png"},
+{n:"小睫",g:"♀",s:"青蛙",p:"大姐姐",pf:"大姐姐A型",m:10,d:2,c:"蛤",h:"健身",st:"绚丽、优雅",co:"紫色、浅蓝色",pt:"高",mo:"竹篮打水一场空",fn:"アイーダ(日) Diva(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8d/96ovso0lbb4pno1gx6ezwz8j64noofo.png"},
+{n:"阿刻",g:"♂",s:"青蛙",p:"悠闲",pf:"悠闲B型",m:7,d:8,c:"嚼嚼",h:"游戏",st:"简单",co:"橙色、黄色",pt:"中",mo:"浊水无蛙",fn:"クワトロ(日) Jeremiah(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/58/dbu7scdrjao5a0vgxh8af5d7a5yy00f.png"},
+{n:"茉莉",g:"♀",s:"象",p:"普通",pf:"普通A型",m:11,d:18,c:"呼",h:"自然",st:"可爱、优雅",co:"黑色、白色",pt:"中",mo:"下午茶会",fn:"ティーナ(日) Tia(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2c/kn4oyqbmdvp1naxr0kyj1wqp7na86wk.png"},
+{n:"比利",g:"♂",s:"山羊",p:"暴躁",pf:"暴躁B型",m:8,d:29,c:"耶",h:"音乐",st:"酷、绚丽",co:"紫色、黑色",pt:"低",mo:"家家有本难念的经",fn:"ビリー(日) Gruff(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/32/qo497aek52jbl95vxsgu2yu1dh9gkqs.png"},
+{n:"翡翠",g:"♀",s:"青蛙",p:"普通",pf:"普通B型",m:10,d:27,c:"是蛙",h:"时尚",st:"酷",co:"棕色",pt:"中",mo:"绝不追吻",fn:"エスメラルダ(日) Jambette(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ec/jql712lgnzfa8lpqd3e6scad9hv2mz2.png"},
+{n:"迷仔",g:"♂",s:"青蛙",p:"暴躁",pf:"暴躁B型",m:6,d:5,c:"喂",h:"音乐",st:"酷、活跃",co:"蓝色、白色",pt:"低",mo:"一触即发",fn:"フルメタル(日) Camofrog(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f6/q8txnu7am41kz94rbk3txar0liq8rjc.png"},
+{n:"保罗",g:"♂",s:"象",p:"悠闲",pf:"悠闲A型",m:5,d:5,c:"保罗",h:"自然",st:"简单、优雅",co:"灰色、浅蓝色",pt:"中",mo:"与别人一模一样",fn:"パオロ(日) Paolo(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c5/70olxzbcxny9ayriswuesp2ibfy2op3.png"},
+{n:"亨利",g:"♂",s:"青蛙",p:"自恋",pf:"自恋A型",m:9,d:21,c:"滴咕",h:"音乐",st:"酷、简单",co:"蓝色、浅蓝色",pt:"中",mo:"心平气和",fn:"ヘンリー(日) Henry(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/59/0b40egp2b7ow9w60jti8m1zzzn9o2wb.png"},
+{n:"阿田",g:"♂",s:"青蛙",p:"运动",pf:"运动A型",m:8,d:3,c:"蝌蚪",h:"游戏",st:"活跃、简单",co:"黄色、彩色",pt:"高",mo:"青蛙的孩子会游泳",fn:"タンボ(日) Tad(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/40/pdeg0mcbkbb1ormxzkan6pgtkmb1up8.png"},
+{n:"庞克斯",g:"♂",s:"象",p:"暴躁",pf:"暴躁A型",m:6,d:9,c:"摇滚",h:"音乐",st:"酷、活跃",co:"黑色、黄色",pt:"中",mo:"居然自作主张",fn:"パンクス(日) Cyd(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/47/colkszeqlgjl44wcolpq4hzft032p8g.png"},
+{n:"嘉俊",g:"♂",s:"青蛙",p:"悠闲",pf:"悠闲A型",m:6,d:6,c:"哈啾",h:"自然",st:"优雅、简单",co:"白色、灰色",pt:"中",mo:"病从心头起",fn:"カックン(日) Raddle(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7d/7g5io3kqwvnmvh1pdiqit4h8h9ujd5r.png"},
+{n:"毒仔",g:"♂",s:"青蛙",p:"运动",pf:"运动B型",m:10,d:9,c:"聒聒",h:"健身",st:"简单、活跃",co:"橙色、红色",pt:"高",mo:"井蛙不可语海，夏虫不可语冰",fn:"ドク(日) Drift(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/92/t75vh1e5gcz48715cpg8kcrfezqovhe.png"},
+{n:"大大",g:"♂",s:"象",p:"运动",pf:"运动B型",m:3,d:23,c:"嘻嘻",h:"健身",st:"活跃、简单",co:"绿色、白色",pt:"高",mo:"露齿而不笑",fn:"エックスエル(日) Axel(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/20/tl6m5wzyhbvt0h4rcv75irezu0aj26n.png"},
+{n:"雪儿",g:"♀",s:"山羊",p:"普通",pf:"普通B型",m:3,d:6,c:"呗",h:"教育",st:"可爱、优雅",co:"红色、粉色",pt:"中",mo:"南柯一梦",fn:"ユキ(日) Chevre(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/92/tfdojprp04ra4a50g0r5jujozkxdlpp.png"},
+{n:"春卷",g:"♂",s:"青蛙",p:"运动",pf:"运动B型",m:12,d:17,c:"不客气",h:"健身",st:"优雅、绚丽",co:"绿色、红色",pt:"高",mo:"蛙跳必有雨",fn:"ハルマキ(日) Cousteau(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f6/qp9or356mx4eprxbhi05ol56x61k8o4.png"},
+{n:"雷妮",g:"♀",s:"青蛙",p:"普通",pf:"普通B型",m:2,d:4,c:"雨雨",h:"教育",st:"可爱、简单",co:"白色、黄色",pt:"中",mo:"不打不相识",fn:"レイニー(日) Lily(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e4/27l9vlp4npt7splyi4q05pgkfquztv3.png"},
+{n:"啡卡(三丽鸥联动)",g:"♀",s:"象",p:"活泼",pf:"元气A型",m:3,d:6,c:"大耳",h:"游戏",st:"可爱、优雅",co:"蓝色、水蓝色",pt:"",mo:"He who chases two rabbits catches none.",fn:"フィーカ(日) Chai(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/76/49mmmlx1o4vpppzbuvykcziu2f61jfh.png"},
+{n:"林妲",g:"♀",s:"青蛙",p:"成熟",pf:"成熟B型",m:8,d:11,c:"宝贝",h:"时尚",st:"绚丽、优雅",co:"黑色、白色",pt:"中",mo:"玫瑰色的人生",fn:"リンダ(日) Gigi(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4e/g4ie0cl055f54ncfwm3a7euiuf0m2fv.png"},
+{n:"山姆",g:"♂",s:"青蛙",p:"暴躁",pf:"暴躁B型",m:8,d:21,c:"山山",h:"教育",st:"简单",co:"蓝色、紫色",pt:"低",mo:"有蛙的地方就有水",fn:"サム(日) Wart Jr.(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/db/emquelpgwthlebr52sv40ol9wpsofll.png"},
+{n:"泡芙",g:"♀",s:"象",p:"普通",pf:"普通A型",m:5,d:12,c:"啦啷",h:"自然",st:"简单、可爱",co:"灰色、粉色",pt:"中",mo:"尝尽人生百味",fn:"エクレア(日) Ellie(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/38/k1yfyahl3gs9ljs7x2s3mi996wbpug4.png"},
+{n:"墨墨",g:"♀",s:"山羊",p:"普通",pf:"普通B型",m:8,d:24,c:"书",h:"自然",st:"简单、优雅",co:"橙色、黄色",pt:"中",mo:"多此一举",fn:"スミ(日) Nan(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e0/bboh9xv51ysue2g1r0v4fqs1vri9i5l.png"},
+{n:"吸管",g:"♂",s:"青蛙",p:"自恋",pf:"自恋A型",m:7,d:9,c:"喝喝",h:"健身",st:"简单、酷",co:"绿色、黄色",pt:"中",mo:"知恩图报",fn:"ストロー(日) Huck(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/12/hihgv2hx28jy7imhxc2z5k8xchmjy6e.png"},
+{n:"锵锵",g:"♂",s:"青蛙",p:"运动",pf:"运动B型",m:2,d:13,c:"机器",h:"健身",st:"简单、活跃",co:"蓝色、浅蓝色",pt:"高",mo:"流水不腐户枢不蠹",fn:"ガチャ(日) Ribbot(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/79/q2kqasr6hesugklqmoxenym3ohk5nvh.png"},
+{n:"太子",g:"♂",s:"青蛙",p:"暴躁",pf:"暴躁A型",m:7,d:18,c:"子曰",h:"自然",st:"优雅、酷",co:"红色、橙色",pt:"中",mo:"滴水石穿",fn:"タイシ(日) Croque(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/70/03hahqavmi2h4jj7mll2xicmeep7mln.png"},
+{n:"剪刀",g:"♀",s:"青蛙",p:"活泼",pf:"元气B型",m:1,d:13,c:"石头",h:"时尚",st:"可爱、绚丽",co:"绿色、粉色",pt:"高",mo:"忽悲忽喜",fn:"チョキ(日) Puddles(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8a/ffp0aar02eksqqds9atw9aoltbuep1y.png"},
+{n:"阿原",g:"♂",s:"象",p:"悠闲",pf:"悠闲A型",m:9,d:7,c:"毛毛",h:"自然",st:"活跃、简单",co:"黄色、橙色",pt:"中",mo:"历史会重演",fn:"はじめ(日) Tucker(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/33/3qjoaz07j4okjmky0nb2usicwylf947.png"},
+{n:"亚星",g:"♂",s:"山羊",p:"运动",pf:"运动A型",m:3,d:25,c:"唷喏",h:"游戏",st:"简单、活跃",co:"蓝色、紫色",pt:"高",mo:"青春洋溢",fn:"アーシンド(日) Billy(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/ln7ds9677x3mmbrvs7sbobet2m5g7le.png"},
+{n:"青呱",g:"♂",s:"青蛙",p:"悠闲",pf:"悠闲B型",m:7,d:21,c:"是的",h:"游戏",st:"简单、活跃",co:"黄色、白色",pt:"中",mo:"贴合三刀片",fn:"カール(日) Prince(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b1/ibim1vghz8f909jjyxjqp4ion0zv33y.png"},
+{n:"江适",g:"♂",s:"青蛙",p:"运动",pf:"运动B型",m:2,d:8,c:"咕噜",h:"健身",st:"活跃、简单",co:"蓝色、彩色",pt:"高",mo:"相由心生",fn:"コージィ(日) Frobert(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/j893zf7u1cayty1uowpj48jyervqldg.png"},
+{n:"雷姆",g:"♂",s:"山羊",p:"悠闲",pf:"悠闲A型",m:1,d:18,c:"轻飘",h:"自然",st:"简单、可爱",co:"灰色、蓝色",pt:"中",mo:"吉星高照",fn:"レム(日) Sherb(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/91/0mw0w2nz56zvpifrapf8ogf2aqnc6jm.png"},
+{n:"欧世豪",g:"♂",s:"河马",p:"暴躁",pf:"暴躁B型",m:1,d:7,c:"世世",h:"教育",st:"酷、简单",co:"绿色、橙色",pt:"低",mo:"纸上谈兵",fn:"オリバー(日) Harry(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/19/ikqwt3dq1h9o480ke1q0mkw4l4zhlqn.png"},
+{n:"安安",g:"♀",s:"仓鼠",p:"成熟",pf:"成熟A型",m:8,d:9,c:"相信我",h:"教育",st:"酷、绚丽",co:"红色、黄色",pt:"低",mo:"梦都是反梦",fn:"シャンティ(日) Soleil(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c9/q4mw4rwxrhpbtu13fm5sw3hlurmtdfg.png"},
+{n:"空空",g:"♂",s:"猩猩",p:"暴躁",pf:"暴躁A型",m:10,d:1,c:"喔喔",h:"健身",st:"简单、酷",co:"红色、黑色",pt:"中",mo:"要透过现象看本质",fn:"ボイド(日) Boyd(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/44/hm4dq0lmgyt8ym4esz7il2d9o06qouu.png"},
+{n:"曹珂",g:"♀",s:"河马",p:"活泼",pf:"元气B型",m:9,d:18,c:"是是",h:"时尚",st:"活跃、可爱",co:"紫色、粉色",pt:"高",mo:"沉默是金",fn:"チャコ(日) Bubbles(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/52/h4uwkdwmnbwn26niy09dtdxbf1xknwk.png"},
+{n:"哈姆",g:"♂",s:"仓鼠",p:"运动",pf:"运动A型",m:5,d:30,c:"火腿",h:"游戏",st:"简单、活跃",co:"紫色、蓝色",pt:"高",mo:"一人计短，二人计长",fn:"ハムスケ(日) Hamlet(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/81/5egq9llgwtm3r8thngyfct8fjf2hyb3.png"},
+{n:"阿朗",g:"♂",s:"猩猩",p:"暴躁",pf:"暴躁B型",m:9,d:6,c:"拍胸脯",h:"健身",st:"酷、优雅",co:"蓝色、浅蓝色",pt:"低",mo:"人有须，木有根",fn:"アラン(日) Cesar(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ea/48rkiq6xtnvc3b0d7e23bm6gdp25dd9.png"},
+{n:"戴维",g:"♂",s:"河马",p:"自恋",pf:"自恋A型",m:10,d:15,c:"Yes",h:"教育",st:"优雅、绚丽",co:"棕色、绿色",pt:"中",mo:"国士无双",fn:"ディビッド(日) Hippeux(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/5d/4rqmnnc0fjrmbmaj75ihcvrectr97d2.png"},
+{n:"子墨",g:"♂",s:"仓鼠",p:"悠闲",pf:"悠闲A型",m:10,d:19,c:"忐忑不安",h:"自然",st:"优雅、简单",co:"米色、棕色",pt:"中",mo:"行云流水",fn:"どぐろう(日) Clay(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/25/b0e7ejx4h0tfbrqjyvhbd26fkouervl.png"},
+{n:"吴紫眉",g:"♀",s:"猩猩",p:"成熟",pf:"成熟B型",m:9,d:1,c:"唉呀",h:"健身",st:"绚丽、酷",co:"紫色、粉色",pt:"中",mo:"胳膊粗，胆子就大",fn:"ウズメ(日) Violet(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/66/nahdv9i1uzp8xn87vhrhqdjscbh1y7z.png"},
+{n:"班长",g:"♀",s:"山羊",p:"成熟",pf:"成熟B型",m:1,d:14,c:"起立",h:"教育",st:"优雅、绚丽",co:"浅蓝色、紫色",pt:"中",mo:"上流、名门、精英",fn:"ピティエ(日) Velma(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c7/81kle150pdfctdrg1r9sb7pblijogse.png"},
+{n:"豆沙",g:"♀",s:"河马",p:"普通",pf:"普通B型",m:4,d:25,c:"没错",h:"教育",st:"可爱、优雅",co:"粉色、白色",pt:"中",mo:"舍华求实",fn:"あんこ(日) Bertha(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7f/87kftednofchygtfo3x8n2egl1k3d4k.png"},
+{n:"苹果",g:"♀",s:"仓鼠",p:"活泼",pf:"元气A型",m:9,d:24,c:"转转",h:"游戏",st:"可爱、简单",co:"彩色、红色",pt:"高",mo:"近朱者赤",fn:"アップル(日) Apple(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/dd/1oyxt3seg2gggyhjquhwdncuh0h3h52.png"},
+{n:"哑铃",g:"♂",s:"猩猩",p:"暴躁",pf:"暴躁B型",m:9,d:11,c:"高高",h:"健身",st:"活跃、酷",co:"橙色、蓝色",pt:"低",mo:"虚有其表",fn:"ダンベル(日) Peewee(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cd/a55zqrdef7kkktyxc163gi50lt73iu5.png"},
+{n:"威亚",g:"♂",s:"马",p:"运动",pf:"运动B型",m:4,d:4,c:"搞笑",h:"健身",st:"活跃、简单",co:"灰色、棕色",pt:"高",mo:"祸不单行",fn:"ヴァヤシコフ(日) Buck(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/03/62l7bsz16xvrbw8jjylprohoaj09n8n.png"},
+{n:"雪美",g:"♀",s:"仓鼠",p:"普通",pf:"普通A型",m:1,d:30,c:"对啊",h:"自然",st:"优雅、可爱",co:"红色、粉色",pt:"中",mo:"掌上明珠",fn:"ゆきみ(日) Flurry(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3c/517wl1nxxlzdww8hvfpwbhk02nn7im4.png"},
+{n:"阿保",g:"♂",s:"猩猩",p:"悠闲",pf:"悠闲B型",m:10,d:18,c:"呜呼",h:"健身",st:"活跃",co:"红色、白色",pt:"中",mo:"无色无味",fn:"たもつ(日) Al(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/11/3iiszn72bh3y02z42hvzdyhvsuv40oi.png"},
+{n:"文青",g:"♂",s:"山羊",p:"自恋",pf:"自恋B型",m:6,d:28,c:"啊",h:"教育",st:"优雅、酷",co:"灰色、白色",pt:"高",mo:"文学需沉溺其中",fn:"やさお(日) Kidd(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8e/fs9mtvm7rv0aczz2klc709oeooloohr.png"},
+{n:"贾宝为",g:"♂",s:"河马",p:"运动",pf:"运动B型",m:3,d:29,c:"因为",h:"健身",st:"绚丽、活跃",co:"黑色、蓝色",pt:"高",mo:"不劳而获",fn:"ガブリエル(日) Biff(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7f/rplap7kqzrycu7gevgou7b89j92j7ak.png"},
+{n:"麦麦",g:"♂",s:"仓鼠",p:"自恋",pf:"自恋A型",m:6,d:20,c:"就是这样",h:"教育",st:"简单、酷",co:"绿色、橙色",pt:"中",mo:"学无止境",fn:"グラハム(日) Graham(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a1/2ldoe8a0yr537pgr85uaar5aw4pkmve.png"},
+{n:"万泰",g:"♂",s:"猩猩",p:"运动",pf:"运动B型",m:9,d:12,c:"这家伙",h:"健身",st:"优雅、酷",co:"彩色、红色",pt:"高",mo:"语文补习与数学补习",fn:"まんたろう(日) Boone(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0a/pcv310lwe8nfurz45hwodddkgz79tst.png"},
+{n:"小仓",g:"♂",s:"仓鼠",p:"暴躁",pf:"暴躁A型",m:2,d:25,c:"怒",h:"自然",st:"酷、简单",co:"灰色、米色",pt:"中",mo:"四海之内皆兄弟",fn:"ハムジ(日) Hamphrey(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/mmr82yu5xor08h0de43j4hkl2ajh3e8.png"},
+{n:"阿四",g:"♀",s:"猩猩",p:"大姐姐",pf:"大姐姐B型",m:4,d:14,c:"煞啊",h:"健身",st:"活跃、酷",co:"粉色、红色",pt:"中",mo:"一技傍身",fn:"４ごう(日) Rocket(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e4/muz86rthi22e9uxjp0aj2xb49cac3om.png"},
+{n:"芭芭拉",g:"♀",s:"山羊",p:"大姐姐",pf:"大姐姐A型",m:12,d:26,c:"或许芭",h:"音乐",st:"酷、优雅",co:"红色、彩色",pt:"高",mo:"祸兮福所倚，福兮祸所伏",fn:"バーバラ(日) Pashmina(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bd/fk693rcqcidrjrs8ts2pdcp56lmp7q8.png"},
+{n:"艾咪",g:"♀",s:"河马",p:"成熟",pf:"成熟A型",m:10,d:6,c:"哔哔",h:"教育",st:"可爱、优雅",co:"粉色、橙色",pt:"低",mo:"必要就是忠告",fn:"エーミー(日) Bitty(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6d/26xsjrfo4ejciz5lfxtkwb93agnvq6d.png"},
+{n:"米米",g:"♂",s:"仓鼠",p:"自恋",pf:"自恋A型",m:11,d:10,c:"咻咻",h:"音乐",st:"绚丽、酷",co:"粉色、彩色",pt:"中",mo:"春眠不觉晓",fn:"ジミー(日) Rodney(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d8/klbh6w1itf1aiqe1ohgl838hkubysuf.png"},
+{n:"壮壮",g:"♂",s:"猩猩",p:"运动",pf:"运动A型",m:3,d:26,c:"钢钢",h:"健身",st:"活跃、简单",co:"灰色、红色",pt:"高",mo:"肌肉发达",fn:"マッスル(日) Louie(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/14/dxpmoaaw8hbp5vpzwbqg920xba2ua0q.png"},
+{n:"莉拉(三丽鸥联动)",g:"♀",s:"猩猩",p:"活泼",pf:"元气A型",m:11,d:1,c:"哈啰",h:"自然",st:"可爱、优雅",co:"红色、蓝色",pt:"",mo:"Where there is a will,there is a way.",fn:"リラ(日) Rilla(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/97/dxad8q9v7v40g01jpktenhweg4eo43e.png"},
+{n:"孔在来",g:"♂",s:"河马",p:"暴躁",pf:"暴躁B型",m:8,d:18,c:"觉得是啦",h:"教育",st:"简单、酷",co:"黄色、黑色",pt:"低",mo:"10头河马钻不进1个洞",fn:"ゴンザレス(日) Rocco(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/52/74g6ceyzk3b96i6i956xbibfj1jblf1.png"},
+{n:"史奈鲁",g:"♂",s:"猩猩",p:"自恋",pf:"自恋A型",m:12,d:5,c:"同意",h:"健身",st:"优雅、绚丽",co:"灰色、蓝色",pt:"中",mo:"好人有好报",fn:"スナイル(日) Hans(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/32/esep9p6rng1o34r86bg15kojzmswwc7.png"},
+{n:"小铀",g:"♀",s:"马",p:"成熟",pf:"成熟A型",m:2,d:9,c:"游游",h:"教育",st:"可爱、优雅",co:"浅蓝色、白色",pt:"低",mo:"洗澡时大家都赤诚相见",fn:"アイソトープ(日) Cleo(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d8/mptyd9duk68gboc12n92l6ln1pbzjgw.png"},
+{n:"简培菈",g:"♀",s:"考拉",p:"大姐姐",pf:"大姐姐A型",m:5,d:14,c:"咦",h:"游戏",st:"活跃、酷",co:"绿色、浅蓝色",pt:"高",mo:"大堡礁",fn:"キャンベラ(日) Canberra(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e6/hbf44jwb4zsnlztzaefot1xcps2h6hk.png"},
+{n:"小冈",g:"♂",s:"马",p:"悠闲",pf:"悠闲A型",m:1,d:10,c:"听说是",h:"自然",st:"简单",co:"橙色、浅蓝色",pt:"中",mo:"秋高马肥",fn:"オカッピ(日) Papi(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/57/et66rqm6lea9c2i584fzmadswb3ankp.png"},
+{n:"酥饼",g:"♂",s:"马",p:"悠闲",pf:"悠闲B型",m:10,d:5,c:"酥酥",h:"游戏",st:"简单、酷",co:"蓝色、白色",pt:"中",mo:"本末倒置",fn:"サブレ(日) Elmer(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6d/q9tuf5zigsqwi17uqvcg7tj80bmlg2i.png"},
+{n:"妈咪",g:"♀",s:"袋鼠",p:"普通",pf:"普通A型",m:12,d:5,c:"亲亲",h:"自然",st:"可爱",co:"红色、彩色",pt:"中",mo:"养儿一百岁，常忧九十九",fn:"マミィ(日) Carrie(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a8/d01fez3707oi8jma6ad7hi37ldka38g.png"},
+{n:"阿得",g:"♀",s:"考拉",p:"普通",pf:"普通B型",m:4,d:12,c:"不得了",h:"教育",st:"可爱",co:"白色、绿色",pt:"中",mo:"不合时宜的圣诞老人",fn:"アデレード(日) Melba(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cb/n717nzm6jws9zgi9drk3ayo7z7ujsgi.png"},
+{n:"小薰",g:"♀",s:"马",p:"普通",pf:"普通B型",m:11,d:28,c:"蹦",h:"教育",st:"可爱、简单",co:"彩色、浅蓝色",pt:"中",mo:"防寒规格",fn:"ドサコ(日) Peaches(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1a/jzyppv0z5ozo5reb7io9ewpoel35ysw.png"},
+{n:"敖志明",g:"♂",s:"考拉",p:"运动",pf:"运动A型",m:10,d:12,c:"哇。",h:"游戏",st:"简单、活跃",co:"浅蓝色、黄色",pt:"高",mo:"尤加利精油配方",fn:"オズモンド(日) Lyman(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a9/4txtpw7gqq1yu34iukiv8s5hsodpe0b.png"},
+{n:"朱黎",g:"♂",s:"马",p:"自恋",pf:"自恋A型",m:3,d:15,c:"喂！你",h:"音乐",st:"绚丽、酷",co:"紫色、蓝色",pt:"中",mo:"天马行空",fn:"ジュリー(日) Julian(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c7/pq9pp4ikfbba4qe54rbappa6xy29hvs.png"},
+{n:"黑马",g:"♂",s:"马",p:"暴躁",pf:"暴躁B型",m:6,d:16,c:"布鲁鲁",h:"音乐",st:"酷、绚丽",co:"黑色、灰色",pt:"低",mo:"眼睛是心灵的窗户",fn:"シュバルツ(日) Roscoe(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6e/rgw9ntk063coc7normdou3hd37c2lmj.png"},
+{n:"童儿",g:"♀",s:"袋鼠",p:"成熟",pf:"成熟B型",m:9,d:8,c:"庞克",h:"音乐",st:"酷、活跃",co:"黑色、彩色",pt:"中",mo:"外甥不出舅家门",fn:"キッズ(日) Astrid(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b9/79s9vuad9fpqop5dlgknr1yrhywg8lw.png"},
+{n:"思颖",g:"♀",s:"考拉",p:"普通",pf:"普通B型",m:6,d:21,c:"无尾熊",h:"音乐",st:"可爱、简单",co:"米色、黄色",pt:"中",mo:"朝霞不出门，晚霞行千里",fn:"シドニー(日) Sydney(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/dd/82vd9kyqcxpy2rqolwdgcu9ygrhu9tq.png"},
+{n:"舒芙蕾",g:"♀",s:"马",p:"成熟",pf:"成熟B型",m:12,d:2,c:"舒服",h:"时尚",st:"优雅、活跃",co:"蓝色、紫色",pt:"中",mo:"对马弹琴",fn:"シルブプレ(日) Annalise(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/32/qt4oxo4nyn621ybj8waa04s14qmf7r2.png"},
+{n:"罗奇",g:"♂",s:"考拉",p:"自恋",pf:"自恋A型",m:10,d:26,c:"喂喂",h:"音乐",st:"酷、绚丽",co:"黑色、灰色",pt:"中",mo:"眼睛会说话",fn:"ロッキー(日) Eugene(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b0/b4bzcaso8ws8xro1qcj0fcjuihdk85e.png"},
+{n:"雷哈娜",g:"♀",s:"马",p:"大姐姐",pf:"大姐姐A型",m:6,d:4,c:"哼",h:"游戏",st:"酷、绚丽",co:"黑色、紫色",pt:"高",mo:"自力更生",fn:"リアーナ(日) Reneigh(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/97/09tkbzszfnlabu5sxkzb915vomo6xof.png"},
+{n:"马星星",g:"♀",s:"马",p:"活泼",pf:"元气B型",m:1,d:31,c:"嘶嘶",h:"时尚",st:"酷、简单",co:"白色、灰色",pt:"高",mo:"做牛做马",fn:"マキバスター(日) Winnie(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/06/67uix871ru4edcivfeqijp3emrfi7dg.png"},
+{n:"希薇亚",g:"♀",s:"袋鼠",p:"大姐姐",pf:"大姐姐B型",m:5,d:3,c:"对耶",h:"音乐",st:"简单、绚丽",co:"黄色、绿色",pt:"中",mo:"父母是儿女的镜子",fn:"シルビア(日) Sylvia(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/13/s5h7ra9f9cl9c7w2gtqdc8pu0d9np7h.png"},
+{n:"钢锁",g:"♂",s:"考拉",p:"暴躁",pf:"暴躁A型",m:10,d:13,c:"钱钱",h:"自然",st:"简单、酷",co:"黑色、绿色",pt:"中",mo:"亲兄弟明算账",fn:"ゴンゾー(日) Gonzo(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cf/dmjs3dw9tgo56lbnpgfrb810in5dlsc.png"},
+{n:"笛笛",g:"♂",s:"马",p:"悠闲",pf:"悠闲B型",m:5,d:1,c:"吹卷卷",h:"游戏",st:"简单、可爱",co:"绿色、白色",pt:"中",mo:"马耳东风",fn:"デースケ(日) Clyde(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c8/0bdbv5dmy148jwzj6wz7i0dopz7bl23.png"},
+{n:"圣萝",g:"♀",s:"马",p:"活泼",pf:"元气B型",m:7,d:11,c:"走哦",h:"健身",st:"活跃、简单",co:"黄色、橙色",pt:"高",mo:"未雨绸缪",fn:"セントアロー(日) Victoria(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/35/4q9luopcjzive7y700cp1y7wxkqhhq6.png"},
+{n:"缝缝",g:"♀",s:"袋鼠",p:"普通",pf:"普通B型",m:10,d:11,c:"补补",h:"教育",st:"优雅、简单",co:"紫色、红色",pt:"中",mo:"溺爱不是真爱",fn:"アップリケ(日) Kitt(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f3/ti9k5d68jx41lo7tcwydrssvlc8jx0z.png"},
+{n:"尤嘉莉",g:"♀",s:"考拉",p:"成熟",pf:"成熟B型",m:7,d:20,c:"啊啦",h:"时尚",st:"酷、优雅",co:"橙色、黄色",pt:"中",mo:"未审先判",fn:"ユーカリ(日) Yuka(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/87/np28gskvh3c80ecv40jtczapu3dxb3u.png"},
+{n:"马誉",g:"♂",s:"马",p:"自恋",pf:"自恋B型",m:9,d:16,c:"不是啦",h:"自然",st:"绚丽、优雅",co:"黑色、灰色",pt:"高",mo:"梅花香自苦寒来",fn:"キザノホマレ(日) Ed(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e6/eppjc6f67k8cs5qubpyj0kw7v049967.png"},
+{n:"袋钢",g:"♂",s:"袋鼠",p:"暴躁",pf:"暴躁A型",m:4,d:24,c:"别装了",h:"健身",st:"酷",co:"黑色、灰色",pt:"中",mo:"有苦就有乐",fn:"カンロク(日) Walt(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1b/6jp0e69511ua382635cd4iil8p1huhz.png"},
+{n:"阿栗",g:"♂",s:"考拉",p:"悠闲",pf:"悠闲B型",m:5,d:7,c:"颗颗",h:"游戏",st:"简单、可爱",co:"黄色、橙色",pt:"中",mo:"半斤八两",fn:"ドングリ(日) Ozzie(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0d/g0tczkumwnmhf5hikf2rgwigs2j452t.png"},
+{n:"安索尼",g:"♂",s:"马",p:"自恋",pf:"自恋A型",m:5,d:22,c:"请看",h:"自然",st:"绚丽、优雅",co:"蓝色、红色",pt:"中",mo:"业界的纯血马",fn:"アンソニー(日) Colton(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b7/q3k33hekqi95zaqqj9gysq5dpwj259r.png"},
+{n:"草斑娜",g:"♀",s:"马",p:"普通",pf:"普通B型",m:1,d:25,c:"说到",h:"音乐",st:"酷、简单",co:"浅蓝色、蓝色",pt:"中",mo:"在热带草原吃午餐",fn:"サバンナ(日) Savannah(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8a/n74e7mp7zrm7syl51wdk1qeb1sl8slo.png"},
+{n:"亚莎",g:"♀",s:"袋鼠",p:"成熟",pf:"成熟B型",m:11,d:12,c:"嘿",h:"健身",st:"酷、绚丽",co:"白色、红色",pt:"中",mo:"血浓于水",fn:"アザラク(日) Mathilda(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/99/d6sssg6olsv35l9dxl6jt93gqd6f1ju.png"},
+{n:"莫儿",g:"♀",s:"考拉",p:"普通",pf:"普通B型",m:8,d:19,c:"晶亮kira",h:"教育",st:"可爱",co:"红色、粉色",pt:"中",mo:"自我意识过剩",fn:"メルボルン(日) Alice(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b7/d1c7gyg0amwiqc90j6529afjruqveco.png"},
+{n:"赖恩睿",g:"♂",s:"狮子",p:"自恋",pf:"自恋A型",m:7,d:29,c:"正确",h:"音乐",st:"绚丽、活跃",co:"绿色、灰色",pt:"中",mo:"英雄本色",fn:"ライオネル(日) Lionel(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/06/mpn3et437nwodgr4fqiyoogsjvitgru.png"},
+{n:"麦克",g:"♂",s:"袋鼠",p:"暴躁",pf:"暴躁A型",m:12,d:1,c:"做就对了",h:"健身",st:"活跃",co:"灰色、黑色",pt:"中",mo:"无差别",fn:"マイク(日) Rooney(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/0e/gutd9fdapglqm349tp2sz76id8g4sun.png"},
+{n:"阿将",g:"♂",s:"老鼠",p:"运动",pf:"运动B型",m:8,d:14,c:"厉害",h:"健身",st:"活跃、酷",co:"蓝色、浅蓝色",pt:"高",mo:"渴望自由的笼中雀",fn:"ジャン(日) Rod(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/8wh64dtx5i0eewt12a4sqtcn4o1tn4c.png"},
+{n:"孟琪",g:"♀",s:"猴子",p:"成熟",pf:"成熟B型",m:3,d:21,c:"孟孟",h:"时尚",st:"优雅、绚丽",co:"紫色、红色",pt:"中",mo:"来者不拒",fn:"モンこ(日) Elise(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/evl4zb8pyitmok5i7lr2h35l0xwop54.png"},
+{n:"晴天",g:"♂",s:"狮子",p:"悠闲",pf:"悠闲A型",m:7,d:24,c:"狮狮",h:"自然",st:"简单、可爱",co:"蓝色、浅蓝色",pt:"中",mo:"美好的星期天",fn:"サンデー(日) Rex(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6d/7bjgpbh8rzm5iev5z0pjmbpu4txqt7l.png"},
+{n:"阿聘",g:"♂",s:"老鼠",p:"运动",pf:"运动B型",m:9,d:13,c:"可恶",h:"健身",st:"酷、绚丽",co:"紫色、红色",pt:"高",mo:"穷鼠啮狸",fn:"ピン(日) Moose(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b5/ig3bpkwz9ym7krs4bdlkjqs4aal7v4u.png"},
+{n:"韭菜",g:"♂",s:"老鼠",p:"暴躁",pf:"暴躁B型",m:10,d:17,c:"非也",h:"教育",st:"简单、酷",co:"绿色、蓝色",pt:"低",mo:"忍人所不能忍",fn:"らっきょ(日) Limberg(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/24/7gaw5pv3f0niodgyc694vznx82sljk6.png"},
+{n:"七七",g:"♀",s:"猴子",p:"普通",pf:"普通B型",m:8,d:23,c:"唔唔",h:"教育",st:"可爱",co:"粉色、白色",pt:"中",mo:"第一选择是香蕉",fn:"チッチ(日) Nana(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fc/870tidowcze3vja3fpzqo4t4d2ujnuf.png"},
+{n:"玛莉亚",g:"♀",s:"袋鼠",p:"普通",pf:"普通A型",m:5,d:31,c:"好唷",h:"自然",st:"可爱、优雅",co:"粉色、米色",pt:"中",mo:"意气相投",fn:"マリア(日) Marcie(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/72/8igbn063brd1hmna4rjhmtwszyr6xpm.png"},
+{n:"甘油",g:"♀",s:"老鼠",p:"活泼",pf:"元气A型",m:4,d:13,c:"滑滑",h:"游戏",st:"简单、可爱",co:"浅蓝色、黄色",pt:"高",mo:"任他泰山压顶，我自巍然不动",fn:"かんゆ(日) Candi(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/5a/jl0p136ll16vbpm9hjisv3pooxhogvu.png"},
+{n:"天佑",g:"♂",s:"猴子",p:"运动",pf:"运动A型",m:11,d:21,c:"差不多",h:"音乐",st:"活跃、简单",co:"蓝色、黄色",pt:"高",mo:"山中无老虎猴子称大王",fn:"さすけ(日) Flip(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/75/65o6boxxh9smu76rb9p3hsqgh8azpw8.png"},
+{n:"老狮",g:"♂",s:"狮子",p:"自恋",pf:"自恋A型",m:8,d:14,c:"上课了",h:"教育",st:"优雅、绚丽",co:"紫色、绿色",pt:"中",mo:"因材施教",fn:"ティーチャー(日) Leopold(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a8/oan43wxd9nxjtobdcttjbd8br708uat.png"},
+{n:"丸子",g:"♀",s:"老鼠",p:"普通",pf:"普通B型",m:6,d:12,c:"就说吧",h:"教育",st:"简单、优雅",co:"白色、红色",pt:"中",mo:"现在就是最好的时候",fn:"マルコ(日) Bettina(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/09/l7wsaw634rfes0dk28p0y3ajx1d6orp.png"},
+{n:"贝拉",g:"♀",s:"老鼠",p:"活泼",pf:"元气B型",m:12,d:28,c:"嘎哈",h:"音乐",st:"酷、活跃",co:"黑色、紫色",pt:"高",mo:"有理不在声高",fn:"イザベラ(日) Bella(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/ac/ahlsx669hvzhxnios1b21k3orylv1fv.png"},
+{n:"远仁",g:"♂",s:"猴子",p:"悠闲",pf:"悠闲B型",m:1,d:19,c:"猿猿",h:"游戏",st:"简单、活跃",co:"红色、彩色",pt:"中",mo:"屋漏偏逢连夜雨",fn:"エテキチ(日) Simon(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/de/7iinzc4mh7nflcc6axle8fe41mk32mv.png"},
+{n:"悄俊",g:"♂",s:"老鼠",p:"暴躁",pf:"暴躁B型",m:1,d:17,c:"蹑蹑",h:"教育",st:"简单、酷",co:"黑色、灰色",pt:"低",mo:"窃钩者诛，窃国者侯",fn:"ちょろきち(日) Rizzo(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c6/ko72zjqc754tgnu8jeicwe3v9koloj6.png"},
+{n:"雪莉",g:"♀",s:"猴子",p:"大姐姐",pf:"大姐姐A型",m:4,d:10,c:"呜吱吱",h:"音乐",st:"可爱、活跃",co:"浅蓝色、黄色",pt:"高",mo:"善始善终",fn:"シェリー(日) Shari(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/58/6ioaexbx5n483jm375o79304nxqvmsm.png"},
+{n:"李克",g:"♂",s:"狮子",p:"运动",pf:"运动B型",m:7,d:10,c:"哈哈哈",h:"健身",st:"活跃、优雅",co:"蓝色、绿色",pt:"高",mo:"势如破竹",fn:"リック(日) Mott(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d1/h5wtq4bfcz1exkl38sm5g8qqso9mpmt.png"},
+{n:"西瓜皮",g:"♀",s:"老鼠",p:"成熟",pf:"成熟B型",m:7,d:7,c:"说说的",h:"时尚",st:"优雅、绚丽",co:"黑色、蓝色",pt:"中",mo:"华而不实",fn:"サラ(日) Bree(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2f/swnl86r4t7m4shwi7j9oczpdu2oenvc.png"},
+{n:"四月",g:"♀",s:"猴子",p:"活泼",pf:"元气B型",m:4,d:2,c:"哇呜",h:"时尚",st:"可爱、活跃",co:"紫色、绿色",pt:"高",mo:"沐猴而冠，自欺欺猴",fn:"エイプリル(日) Tammi(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/db/6cwqgm3z7f1qkpr8jxthr3nggdm58pp.png"},
+{n:"莫敬",g:"♂",s:"狮子",p:"运动",pf:"运动B型",m:8,d:8,c:"男人",h:"健身",st:"活跃、简单",co:"绿色、黄色",pt:"高",mo:"船到桥头自然直",fn:"グラさん(日) Bud(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1f/jw0jnpedfzxo7o65yeqxjjd4wz6k7kw.png"},
+{n:"罗萱儿",g:"♀",s:"老鼠",p:"活泼",pf:"元气B型",m:2,d:24,c:"可爱",h:"时尚",st:"简单、优雅",co:"红色、粉色",pt:"高",mo:"隔墙有耳",fn:"ラザニア(日) Anicotti(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a7/dnuas10v2wcwbelzublkh01tem83ti3.png"},
+{n:"德里",g:"♂",s:"猴子",p:"悠闲",pf:"悠闲A型",m:5,d:24,c:"去吧",h:"自然",st:"绚丽、优雅",co:"紫色、棕色",pt:"中",mo:"知猴善用",fn:"デリー(日) Deli(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e7/lkt0k618jaiud0uunc01hkw0rcs381a.png"},
+{n:"亚瑟",g:"♂",s:"狮子",p:"运动",pf:"运动A型",m:8,d:7,c:"哪哈",h:"音乐",st:"简单、活跃",co:"蓝色、红色",pt:"高",mo:"水到渠成",fn:"アーサー(日) Rory(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/23/pfwfkhhz6cv0i49y8ispf63daij5eyj.png"},
+{n:"和平",g:"♂",s:"老鼠",p:"运动",pf:"运动B型",m:7,d:5,c:"吱",h:"健身",st:"简单、活跃",co:"红色、黄色",pt:"高",mo:"宽以待人易，严以律己难",fn:"ピース(日) Samson(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/73/1y7di93gt1xyon16g2udxbacb76bfg7.png"},
+{n:"皮猴",g:"♂",s:"猴子",p:"暴躁",pf:"暴躁B型",m:12,d:7,c:"香蕉",h:"教育",st:"酷",co:"黄色、灰色",pt:"低",mo:"偶像演员的猴儿戏",fn:"サルモンティ(日) Monty(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c2/ppw0xkl9ix1yut759af7svigv9pmuln.png"},
+{n:"皇狮",g:"♂",s:"狮子",p:"暴躁",pf:"暴躁B型",m:7,d:23,c:"听懂吧",h:"教育",st:"绚丽、优雅",co:"红色、黑色",pt:"低",mo:"百兽之王",fn:"キング(日) Elvis(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/flu90iffdm6h7j6jh16m3oggkn3pfz3.png"},
+{n:"茜蓝",g:"♂",s:"老鼠",p:"悠闲",pf:"悠闲B型",m:6,d:30,c:"微微",h:"游戏",st:"简单、可爱",co:"彩色、黄色",pt:"中",mo:"一通百通",fn:"ブロッコリー(日) Broccolo(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3f/l6masev2ynwhgqiik8nc3muqoxi7uqa.png"},
+{n:"杜美",g:"♀",s:"老鼠",p:"普通",pf:"普通B型",m:2,d:18,c:"美吧",h:"教育",st:"简单、优雅",co:"蓝色、浅蓝色",pt:"中",mo:"穷要忍，富要省",fn:"とめ(日) Dora(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ee/ee9iz1pjbgd4vy0o1a7s5tmyo7pmsp5.png"},
+{n:"朱禄",g:"♂",s:"鸵鸟",p:"悠闲",pf:"悠闲A型",m:9,d:23,c:"哎呀呀",h:"自然",st:"简单、酷",co:"米色、棕色",pt:"中",mo:"子孙繁荣",fn:"トキオ(日) Cranston(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/08/grwklqd4a2pgijsruj7zda1eqxvlr0d.png"},
+{n:"起司",g:"♂",s:"老鼠",p:"自恋",pf:"自恋A型",m:12,d:15,c:"也是啦",h:"健身",st:"优雅、绚丽",co:"黑色、灰色",pt:"中",mo:"每一次相遇都是久别重逢",fn:"チーズ(日) Chadder(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/86/ivc4gm2b9c0rnybutp9ddq1gb15qsdw.png"},
+{n:"欧若拉",g:"♀",s:"企鹅",p:"普通",pf:"普通B型",m:1,d:27,c:"若",h:"教育",st:"可爱、优雅",co:"粉色、红色",pt:"中",mo:"世间自有温情在",fn:"オーロラ(日) Aurora(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/97/gk1iz5nkg7554dcjbygai8hx9or1f27.png"},
+{n:"阿波罗",g:"♂",s:"老鹰",p:"暴躁",pf:"暴躁B型",m:7,d:4,c:"唔咿",h:"音乐",st:"酷、简单",co:"黑色",pt:"低",mo:"韬光养晦",fn:"アポロ(日) Apollo(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e3/31lebg5sp9fscdk3z34mzr86oebtsrk.png"},
+{n:"仙仙",g:"♀",s:"鸵鸟",p:"普通",pf:"普通B型",m:1,d:15,c:"千岁",h:"教育",st:"优雅、可爱",co:"绿色、粉色",pt:"中",mo:"步步生花",fn:"ちとせ(日) Gladys(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/db/4lmlxor5la0tdwdvecu9vl9vsfcu2xz.png"},
+{n:"浩克",g:"♂",s:"老鹰",p:"暴躁",pf:"暴躁B型",m:7,d:30,c:"多谢",h:"教育",st:"绚丽、酷",co:"棕色、黄色",pt:"低",mo:"不偷听他人言",fn:"ハルク(日) Frank(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e0/j32zlpzdcq1tuigs88egfxi9ct0agcy.png"},
+{n:"凯恩",g:"♂",s:"鸵鸟",p:"自恋",pf:"自恋A型",m:11,d:27,c:"轰隆隆",h:"音乐",st:"优雅、酷",co:"绿色、红色",pt:"中",mo:"祸从口出",fn:"ケイン(日) Phil(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/19/1coa4egj6wvqtkiit1ghikooq5nmw7i.png"},
+{n:"张瑜",g:"♂",s:"章鱼",p:"暴躁",pf:"暴躁B型",m:9,d:20,c:"章鱼",h:"游戏",st:"酷、简单",co:"黑色、白色",pt:"低",mo:"月亮背后暗藏玄机",fn:"おくたろう(日) Octavian(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c3/bogw0xegt316vrfhbzz2binuyaxb96g.png"},
+{n:"企鹅达",g:"♂",s:"企鹅",p:"运动",pf:"运动B型",m:1,d:5,c:"企鹅",h:"健身",st:"活跃、简单",co:"红色、黄色",pt:"高",mo:"自私自利",fn:"ペンタ(日) Roald(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/55/scif1ak1fwdhtlfb7nl2lsni4gaftv4.png"},
+{n:"安地斯",g:"♀",s:"老鹰",p:"成熟",pf:"成熟B型",m:11,d:19,c:"卡拉卡拉",h:"音乐",st:"酷、优雅",co:"黑色、白色",pt:"中",mo:"物以类聚",fn:"アンデス(日) Amelia(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9d/2m3gyfjhrpjd3zrshvzwx1jt781z142.png"},
+{n:"小岚",g:"♀",s:"鸵鸟",p:"普通",pf:"普通A型",m:10,d:21,c:"鸵鸟",h:"自然",st:"简单、酷",co:"浅蓝色、白色",pt:"中",mo:"百足之虫死而不僵",fn:"ラン(日) Sandy(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/54/ox6zvrnwqmkhf9iqguxp11zfa4fhnu1.png"},
+{n:"银阁",g:"♂",s:"老鹰",p:"运动",pf:"运动B型",m:12,d:11,c:"呀啊",h:"健身",st:"简单、优雅",co:"蓝色、红色",pt:"高",mo:"燕雀安知鸿鹄之志",fn:"ギンカク(日) Sterling(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e4/3bd68if2sc8wshowwug2o89npcc64vu.png"},
+{n:"小偲",g:"♀",s:"鸵鸟",p:"成熟",pf:"成熟A型",m:12,d:21,c:"是嘛",h:"自然",st:"优雅、绚丽",co:"黑色、棕色",pt:"低",mo:"姜还是老的辣",fn:"しのぶ(日) Blanche(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/73/emotk22s8d2tydzai0ui9pmosrhj3nm.png"},
+{n:"章立娜",g:"♀",s:"章鱼",p:"普通",pf:"普通B型",m:6,d:26,c:"咔",h:"音乐",st:"可爱",co:"粉色、红色",pt:"中",mo:"化百炼钢为绕指柔",fn:"タコリーナ(日) Marina(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f1/9b7seaokt931ntc4kpwjsmhq4a0r8ve.png"},
+{n:"罗斯",g:"♂",s:"企鹅",p:"悠闲",pf:"悠闲B型",m:1,d:29,c:"十字",h:"游戏",st:"简单、可爱",co:"黄色、彩色",pt:"中",mo:"自由散漫",fn:"ビス(日) Cube(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/da/9601l4myh7juqm2vnu3f6kb4z7pk0dt.png"},
+{n:"谢博强",g:"♂",s:"老鹰",p:"运动",pf:"运动B型",m:1,d:8,c:"啪沙啪沙",h:"健身",st:"优雅、活跃",co:"橙色、黄色",pt:"高",mo:"鸡窝里生出了金凤凰",fn:"セバスチャン(日) Pierce(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c4/eu5id2zk5nnpi1cponvyqx8gzih8czg.png"},
+{n:"鹤兹",g:"♂",s:"鸵鸟",p:"运动",pf:"运动A型",m:12,d:1,c:"机械",h:"音乐",st:"简单、活跃",co:"橙色、绿色",pt:"高",mo:"打铁趁热",fn:"ヘルツ(日) Sprocket(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/df/bmh96e2zmeax3s1ffnvhd3gg4inte6c.png"},
+{n:"如意",g:"♀",s:"老鼠",p:"成熟",pf:"成熟A型",m:9,d:5,c:"呵呵呵",h:"教育",st:"优雅、简单",co:"粉色、紫色",pt:"低",mo:"笑口常开，幸福常在",fn:"ふくこ(日) Greta(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/df/ft4olv4jfqadzltoi59xx51jl3udxjk.png"},
+{n:"法兰克",g:"♂",s:"老鹰",p:"自恋",pf:"自恋A型",m:6,d:1,c:"是",h:"音乐",st:"绚丽、酷",co:"蓝色、白色",pt:"中",mo:"老鹰不在家，山雀为王",fn:"フランク(日) Keaton(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/5f/k8a53y9nja257aam60ppaqpkif3cuh4.png"},
+{n:"胡拉拉",g:"♀",s:"鸵鸟",p:"活泼",pf:"元气A型",m:2,d:9,c:"红鹤",h:"游戏",st:"可爱、活跃",co:"彩色、粉色",pt:"高",mo:"当局者迷",fn:"フララ(日) Flora(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/77/2z5t9yhygcb6aga4408f182b843t4lp.png"},
+{n:"章丸丸",g:"♂",s:"章鱼",p:"悠闲",pf:"悠闲A型",m:3,d:8,c:"认同",h:"自然",st:"简单、可爱",co:"蓝色、黄色",pt:"中",mo:"买一送一",fn:"タコヤ(日) Zucker(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/09/lphwha59o6x5smdcpjelmmfavc4shn9.png"},
+{n:"达满",g:"♂",s:"企鹅",p:"暴躁",pf:"暴躁B型",m:4,d:6,c:"“禅”",h:"音乐",st:"酷、简单",co:"黄色、红色",pt:"低",mo:"枯荣无常",fn:"ダルマン(日) Hopper(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9b/hx2val1g0rbvrgh3cnnrlppkzyg3fyc.png"},
+{n:"继光",g:"♂",s:"老鹰",p:"暴躁",pf:"暴躁A型",m:12,d:7,c:"继继",h:"自然",st:"简单、活跃",co:"黄色、红色",pt:"中",mo:"谦受益，满招损",fn:"ひでよし(日) Buzz(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/91/k1qhth8sh8a7zdj6f1z8nlcnt6p0cq2.png"},
+{n:"朱莉亚",g:"♀",s:"鸵鸟",p:"成熟",pf:"成熟A型",m:7,d:31,c:"吼唷",h:"教育",st:"绚丽、优雅",co:"紫色、红色",pt:"低",mo:"三思而后行",fn:"ジュリア(日) Julia(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/89/pbj278ho6r4vuyczcied2z5711etlzq.png"},
+{n:"小啾",g:"♀",s:"老鼠",p:"活泼",pf:"元气A型",m:2,d:5,c:"啾啾",h:"时尚",st:"可爱、绚丽",co:"粉色、红色",pt:"高",mo:"天堑变通途",fn:"チューこ(日) Penelope(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e5/988m0nzr14euy4a67yp5jm2awqr9yfv.png"},
+{n:"蒂芬妮",g:"♀",s:"老鹰",p:"普通",pf:"普通A型",m:3,d:25,c:"是呢",h:"自然",st:"优雅、可爱",co:"粉色、绿色",pt:"中",mo:"顾左右而言他",fn:"ティファニー(日) Celia(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b6/4olkj8xwx3dnpiivsj8o5h77knfuuxx.png"},
+{n:"火鸟",g:"♀",s:"鸵鸟",p:"大姐姐",pf:"大姐姐A型",m:4,d:22,c:"好热",h:"健身",st:"绚丽、酷",co:"黑色、红色",pt:"高",mo:"长生不老",fn:"ヒノコ(日) Phoebe(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cd/2m741s6wpa5gu9p5euxtqntogsjuh8i.png"},
+{n:"果果",g:"♀",s:"鸵鸟",p:"成熟",pf:"成熟B型",m:11,d:13,c:"果然",h:"时尚",st:"绚丽、优雅",co:"黑色、灰色",pt:"中",mo:"颠倒是非，人之常情",fn:"タキュ(日) Queenie(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/14/o1bi5ehmjqzb2em69ie8yl5lt8bbbcc.png"},
+{n:"安谷斯",g:"♂",s:"老鹰",p:"暴躁",pf:"暴躁B型",m:2,d:22,c:"溜溜",h:"音乐",st:"简单、绚丽",co:"橙色、棕色",pt:"低",mo:"是金子总会发光",fn:"クスケチャ(日) Avery(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ee/fc41cdvdzsw7ezzqcaz17uv6g01vz5u.png"},
+{n:"肉肉",g:"♂",s:"猪",p:"悠闲",pf:"悠闲B型",m:9,d:3,c:"噗",h:"游戏",st:"简单、活跃",co:"绿色、彩色",pt:"中",mo:"活到老学到老",fn:"ポーク(日) Spork(美）Crackle(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4b/iosxmq8oodugccuwdh2ju4na4ks5prp.png"},
+{n:"花寿司",g:"♂",s:"企鹅",p:"运动",pf:"运动B型",m:11,d:2,c:"卷卷",h:"健身",st:"活跃、简单",co:"红色、蓝色",pt:"高",mo:"五十步笑百步",fn:"のりまき(日) Iggly(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/71/qnzzn83qvgw44oo37kbgktjwg4yllks.png"},
+{n:"古乃欣",g:"♀",s:"猪",p:"大姐姐",pf:"大姐姐A型",m:4,d:21,c:"噗呼呼",h:"游戏",st:"简单、优雅",co:"粉色、白色",pt:"高",mo:"混淆黑白",fn:"アグネス(日) Agnes(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8c/pi1ml6l5423opdr36l5fa0rqund5mz8.png"},
+{n:"小芽",g:"♀",s:"猪",p:"普通",pf:"普通B型",m:3,d:5,c:"当啷",h:"教育",st:"可爱、优雅",co:"粉色、白色",pt:"中",mo:"徒劳无功",fn:"ためこ(日) Gala(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ea/q1eil21411kw9jlb6ir6w1r17e7fd5g.png"},
+{n:"嘟嘟",g:"♀",s:"猪",p:"活泼",pf:"元气B型",m:7,d:28,c:"哇塞",h:"时尚",st:"可爱、绚丽",co:"绿色、红色",pt:"高",mo:"找松露全靠猪",fn:"トンコ(日) Truffles(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/af/o27p868q3hdhxua7whfyrp8e2zwqdd0.png"},
+{n:"宝拉",g:"♀",s:"企鹅",p:"成熟",pf:"成熟B型",m:1,d:23,c:"唔呼呼",h:"时尚",st:"绚丽、优雅",co:"绿色、白色",pt:"中",mo:"不是不报，时候未到",fn:"ポーラ(日) Gwen(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ec/pp2znp072zvlv2ogiek1m552fgura61.png"},
+{n:"博士",g:"♂",s:"猪",p:"运动",pf:"运动B型",m:10,d:7,c:"公亩",h:"教育",st:"简单、活跃",co:"白色、蓝色",pt:"高",mo:"知书达理",fn:"ハカセ(日) Cobb(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/09/363c99jl9nsyn8tkdza1808mfohjh8k.png"},
+{n:"伏特",g:"♂",s:"企鹅",p:"自恋",pf:"自恋A型",m:10,d:6,c:"宝宝",h:"音乐",st:"酷、优雅",co:"黑色、灰色",pt:"中",mo:"清凉商务",fn:"ボルト(日) Tex(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/49/ok9r5l58k8dh4jhwu8dbhghca8gtpmq.png"},
+{n:"莉莉安",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:5,d:9,c:"好像喔",h:"时尚",st:"可爱",co:"绿色、粉色",pt:"高",mo:"让心爱的孩子远行吧",fn:"リリアン(日) Bunnie(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3e/4uw8h5r7efsfroiz1fwdfubb3gqxlvd.png"},
+{n:"古烈",g:"♂",s:"猪",p:"暴躁",pf:"暴躁B型",m:4,d:7,c:"万年",h:"音乐",st:"酷、简单",co:"蓝色、黑色",pt:"低",mo:"有其父必有其子",fn:"グレオ(日) Rasher(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8a/dmothrerlmfjpsbcgg1sj8y8bdavq02.png"},
+{n:"哈奇",g:"♂",s:"企鹅",p:"悠闲",pf:"悠闲B型",m:2,d:21,c:"候补",h:"健身",st:"活跃、简单",co:"蓝色、红色",pt:"中",mo:"红花还须绿叶配",fn:"ホッケー(日) Puck(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3b/8zvcvfw73ru2tm7j2ojiur9madthv0n.png"},
+{n:"豚皇",g:"♂",s:"猪",p:"自恋",pf:"自恋A型",m:10,d:13,c:"豚",h:"教育",st:"绚丽、优雅",co:"红色、绿色",pt:"中",mo:"胜不骄败不馁",fn:"トンファン(日) Chops(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/11/p4yo43embceklejg39wjcao2dflhupm.png"},
+{n:"达利",g:"♂",s:"猪",p:"暴躁",pf:"暴躁A型",m:11,d:6,c:"噗嘻",h:"自然",st:"酷、绚丽",co:"紫色、黑色",pt:"中",mo:"人生如梦",fn:"ダリー(日) Boris(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/61/ql02vbtci7ab4hr517r4m0dk6e8jgex.png"},
+{n:"玛莎",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:3,d:14,c:"啷",h:"时尚",st:"简单、可爱",co:"蓝色、黑色",pt:"高",mo:"亲而有礼",fn:"マーサ(日) Dotty(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d1/ih2tu2bya6cp3b4whqhq2wycrsxnu6e.png"},
+{n:"蕾拉",g:"♀",s:"企鹅",p:"大姐姐",pf:"大姐姐A型",m:9,d:2,c:"这样唷",h:"音乐",st:"酷、绚丽",co:"红色、紫色",pt:"高",mo:"扑克脸",fn:"レイラ(日) Flo(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1f/du9y3miwoqbqgcaj2cmpt8vrjbairto.png"},
+{n:"阿猪",g:"♂",s:"猪",p:"悠闲",pf:"悠闲B型",m:12,d:30,c:"懒懒",h:"游戏",st:"简单、活跃",co:"米色、黄色",pt:"中",mo:"睡得香甜，工作辛苦",fn:"クッチャネ(日) Hugh(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e1/bvlhebjvu4srieqmn8rilympp2z9val.png"},
+{n:"竹轮",g:"♂",s:"企鹅",p:"悠闲",pf:"悠闲A型",m:10,d:30,c:"所以啦",h:"自然",st:"简单、绚丽",co:"浅蓝色、蓝色",pt:"中",mo:"先有鸡还是先有蛋",fn:"カマボコ(日) Wade(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1e/8301xbo3urk9tch9g6msx6hig6wrrhq.png"},
+{n:"伊比利",g:"♂",s:"猪",p:"运动",pf:"运动A型",m:4,d:26,c:"比利比利",h:"游戏",st:"活跃、简单",co:"黑色、红色",pt:"高",mo:"自给自足",fn:"イノッチ(日) Kevin(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c0/cy68m8ev44ou0pwnxol97z185efm32j.png"},
+{n:"玛格",g:"♀",s:"猪",p:"普通",pf:"普通A型",m:9,d:3,c:"嗯",h:"自然",st:"可爱、优雅",co:"绿色、黄色",pt:"中",mo:"山花移来不觉香",fn:"マーガレット(日) Maggie(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/26/h2sb45u5rm3u93bjrzjfnb9js7ai73y.png"},
+{n:"仰韶",g:"♀",s:"兔子",p:"普通",pf:"普通B型",m:3,d:1,c:"土俑",h:"教育",st:"简单、可爱",co:"米色、绿色",pt:"中",mo:"前方后圆坟",fn:"やよい(日) Coco(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/75/krizmcsw0syyfl0da665yy2h64xj5fk.png"},
+{n:"冰莎",g:"♀",s:"企鹅",p:"活泼",pf:"元气A型",m:2,d:20,c:"凉爽",h:"游戏",st:"可爱、优雅",co:"浅蓝色、白色",pt:"高",mo:"瑞雪兆丰年",fn:"フラッペ(日) Sprinkle(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/51/r4egt0jnu8lxllsxvi70o24uxme25x4.png"},
+{n:"露西",g:"♀",s:"猪",p:"普通",pf:"普通B型",m:6,d:2,c:"唷",h:"音乐",st:"可爱、优雅",co:"粉色、红色",pt:"中",mo:"心急吃不了热豆腐",fn:"ルーシー(日) Lucy(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d6/r51r1nlkfe734as91v19xf25gg0enk4.png"},
+{n:"秀益",g:"♂",s:"企鹅",p:"悠闲",pf:"悠闲B型",m:2,d:7,c:"轧轧",h:"健身",st:"简单、酷",co:"棕色、米色",pt:"中",mo:"吴越同舟",fn:"ショーイ(日) Boomer(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/59/i0jmfzci713s9ofwqrg4piif2aw2i0w.png"},
+{n:"布兰妮",g:"♀",s:"猪",p:"成熟",pf:"成熟A型",m:11,d:14,c:"讨厌啦~",h:"音乐",st:"可爱、绚丽",co:"红色、黄色",pt:"低",mo:"落字为证",fn:"ブリトニー(日) Pancetti(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d9/qjk27gnc7tl5hl4yu6sbqldxsmkepoc.png"},
+{n:"千惠",g:"♀",s:"猪",p:"活泼",pf:"元气B型",m:5,d:23,c:"弹弹",h:"时尚",st:"可爱、活跃",co:"蓝色、红色",pt:"高",mo:"玉不琢不成器",fn:"ちえり(日) Peggy(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bd/tp8hsu6ghbpawlaca0dr6kx209hkvky.png"},
+{n:"百川",g:"♂",s:"兔子",p:"运动",pf:"运动B型",m:11,d:3,c:"忍忍",h:"健身",st:"活跃、简单",co:"黑色、蓝色",pt:"高",mo:"不忍之心",fn:"モモチ(日) Snake(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/78/5p7eo93hwyp55xx9mp5cxaorv1n4afa.png"},
+{n:"胜利",g:"♂",s:"猪",p:"运动",pf:"运动B型",m:7,d:26,c:"感谢",h:"健身",st:"简单、活跃",co:"黄色、彩色",pt:"高",mo:"国外的月亮也不一定圆",fn:"ハムカツ(日) Curly(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/20/qf20oa4l2yt39uj470p3l9hkjkmkr9q.png"},
+{n:"谢宾娜",g:"♀",s:"企鹅",p:"成熟",pf:"成熟B型",m:10,d:16,c:"滑溜溜",h:"时尚",st:"优雅、绚丽",co:"粉色、黑色",pt:"中",mo:"勿履薄冰",fn:"サブリナ(日) Friga(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/fe/mf1s7q6g9u0dhtttzwdqzyoagvl4khq.png"},
+{n:"儒林",g:"♂",s:"兔子",p:"运动",pf:"运动B型",m:1,d:21,c:"臣",h:"健身",st:"优雅、简单",co:"绿色、紫色",pt:"高",mo:"濯濯如春月柳，轩轩如朝霞举",fn:"ゲンジ(日) Genji(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e5/bys6x2eq8pkukt2s3jaaj9eqhxufapk.png"},
+{n:"梦梦",g:"♀",s:"犀牛",p:"普通",pf:"普通B型",m:1,d:24,c:"嗯噗",h:"音乐",st:"优雅、绚丽",co:"紫色、黑色",pt:"中",mo:"骰子已经扔出",fn:"ユメコ(日) Rhonda(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e1/2y3wxf6fir5k8zxu1ik7hej40ru3el5.png"},
+{n:"克莉琪",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:8,d:28,c:"哩啦啦",h:"时尚",st:"可爱",co:"粉色、白色",pt:"高",mo:"妹妹不懂姐姐的心",fn:"クリスチーヌ(日) Chrissy(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a7/jhciny9gwfym04n74ph0soihjhkb5uw.png"},
+{n:"猛兔",g:"♂",s:"兔子",p:"暴躁",pf:"暴躁B型",m:10,d:28,c:"唔贺",h:"教育",st:"简单、绚丽",co:"棕色、橙色",pt:"低",mo:"食物从胡子掉下来",fn:"モサキチ(日) Gaston(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/17/5aeptqefmdhnn7txpx4hdob27ozbx83.png"},
+{n:"绵绵",g:"♀",s:"绵羊",p:"普通",pf:"普通B型",m:4,d:16,c:"就这样呀",h:"时尚",st:"简单、可爱",co:"橙色、红色",pt:"中",mo:"亡羊补牢",fn:"メリヤス(日) Vesta(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7d/87zyggqsehorpb0evby37v22lsb4k8n.png"},
+{n:"阿甘",g:"♂",s:"兔子",p:"悠闲",pf:"悠闲A型",m:8,d:10,c:"就是如此",h:"自然",st:"简单、可爱",co:"橙色、彩色",pt:"中",mo:"动如脱兔",fn:"アマミン(日) Cole(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/48/bgxtgs2w76gheg0269u9fp4pr3tx8rn.png"},
+{n:"月兔",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:12,d:25,c:"普通",h:"自然",st:"可爱、活跃",co:"浅蓝色、粉色",pt:"高",mo:"逐二兔者，不得一兔",fn:"ルナ(日) Ruby(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/16/ctor1h8rfpfrt78v0ul8ouni7al339l.png"},
+{n:"阿蹲",g:"♂",s:"犀牛",p:"暴躁",pf:"暴躁A型",m:6,d:17,c:"混混",h:"自然",st:"酷、绚丽",co:"黑色、灰色",pt:"中",mo:"不改初衷",fn:"スクワット(日) Spike(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2b/kep0zyjducbpa20y4qxvdtrnw373iky.png"},
+{n:"风杰",g:"♂",s:"兔子",p:"悠闲",pf:"悠闲A型",m:3,d:11,c:"风",h:"自然",st:"简单、活跃",co:"蓝色、黄色",pt:"中",mo:"君子不立危墙之下",fn:"プースケ(日) Hopkins(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/48/m5tfdviryiozol7qsv8ji7ddhpon3kd.png"},
+{n:"珮琪",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:12,d:16,c:"琪他",h:"时尚",st:"可爱、绚丽",co:"棕色、红色",pt:"高",mo:"艺术就像金手镯",fn:"ペチカ(日) Gabi(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a8/1mj4m56aedht79cldybbsbnt0ztrimm.png"},
+{n:"华尔滋",g:"♀",s:"绵羊",p:"成熟",pf:"成熟B型",m:3,d:28,c:"一二三",h:"时尚",st:"绚丽、优雅",co:"紫色、蓝色",pt:"中",mo:"演员无年纪",fn:"トロワ(日) Baabara(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2d/hy4wi3i6uscn2wcz5v5uq6goczlqz0k.png"},
+{n:"蜜拉",g:"♀",s:"兔子",p:"大姐姐",pf:"大姐姐A型",m:7,d:6,c:"月球",h:"健身",st:"活跃、酷",co:"红色、黄色",pt:"高",mo:"授人与鱼不如授人与渔",fn:"ミラコ(日) Mira(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f5/46xpeboflx1meoo7q9gy8dbnodr8ff6.png"},
+{n:"阿飞",g:"♂",s:"兔子",p:"悠闲",pf:"悠闲B型",m:3,d:16,c:"是啦",h:"教育",st:"简单、优雅",co:"灰色、米色",pt:"中",mo:"正合我意",fn:"トビオ(日) Doc(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b8/5poq2lslegj7bwt4lpoyeqfao49lold.png"},
+{n:"光雄",g:"♂",s:"犀牛",p:"悠闲",pf:"悠闲A型",m:3,d:20,c:"念念",h:"自然",st:"简单",co:"绿色、棕色",pt:"中",mo:"杀鸡用牛刀",fn:"みつお(日) Hornsby(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/44/hg3hckbwer9j339rb11moywaj6smy5z.png"},
+{n:"桑托斯",g:"♂",s:"兔子",p:"自恋",pf:"自恋B型",m:7,d:24,c:"朋友",h:"自然",st:"活跃、酷",co:"蓝色、浅蓝色",pt:"高",mo:"耳朵是装饰的",fn:"サントス(日) O'Hare(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4d/5kwnkz7b65lt4r0rm2oc31cvscgff71.png"},
+{n:"罗塔",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:6,d:14,c:"就这样啦",h:"时尚",st:"可爱、简单",co:"绿色、棕色",pt:"高",mo:"世界就是个大澡堂",fn:"ロッタ(日) Pippy(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/5c/am40yyinov5mmkclttkyubirkadmquy.png"},
+{n:"毛海儿",g:"♀",s:"绵羊",p:"普通",pf:"普通B型",m:4,d:3,c:"咩",h:"时尚",st:"简单、优雅",co:"米色、橙色",pt:"中",mo:"缘分天注定",fn:"モヘア(日) Eunice(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/8b/9nmc5pj2daqmr6m6kvxd2hr5zphdbns.png"},
+{n:"咚比(三丽鸥联动)",g:"♂",s:"兔子",p:"自恋",pf:"自恋A型",m:7,d:10,c:"蛙蛙",h:"音乐",st:"可爱、优雅",co:"绿色、红色",pt:"",mo:"Toby or not Toby? I don't know, I'm asking you.",fn:"トビー(日) Toby(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d1/fzh6sclueerwkz87wd913hiny3jkati.png"},
+{n:"阿醋",g:"♂",s:"兔子",p:"悠闲",pf:"悠闲A型",m:12,d:3,c:"酸酸",h:"自然",st:"简单",co:"黑色、彩色",pt:"中",mo:"人不可貌相",fn:"ビネガー(日) Claude(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7c/4lkhhtbk1dm6dh7mx0zr06jjtist5p8.png"},
+{n:"草莓",g:"♀",s:"犀牛",p:"普通",pf:"普通A型",m:3,d:19,c:"糖糖",h:"自然",st:"可爱、简单",co:"白色、红色",pt:"中",mo:"蛋糕吃到饱",fn:"パティ(日) Merengue(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ef/77kati0bgxauqxuyu67pwpyjtsm0e2v.png"},
+{n:"巧蔻",g:"♀",s:"兔子",p:"活泼",pf:"元气B型",m:1,d:6,c:"真的",h:"时尚",st:"优雅、可爱",co:"绿色、米色",pt:"高",mo:"凡事莫强求",fn:"チョコ(日) Carmen(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/25/7jzjauc9zfcy88lorf1yuz7mvtftdw0.png"},
+{n:"大姐头",g:"♀",s:"兔子",p:"成熟",pf:"成熟B型",m:1,d:9,c:"我说呀",h:"时尚",st:"绚丽、酷",co:"黑色、红色",pt:"中",mo:"面恶心善",fn:"バズレー(日) Tiffany(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/13/5azpbdwxoxpz1ljb68lpr08wy4a3gt4.png"},
+{n:"毡毡",g:"♀",s:"绵羊",p:"普通",pf:"普通A型",m:4,d:9,c:"羊毛",h:"自然",st:"简单",co:"黄色、米色",pt:"中",mo:"100%化纤",fn:"アクリル(日) Stella(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/4fzu1zxj9k2bqx8itjd7hwtl37wvuyv.png"},
+{n:"阿足",g:"♂",s:"犀牛",p:"运动",pf:"运动B型",m:5,d:6,c:"犀犀",h:"健身",st:"活跃、简单",co:"红色、绿色",pt:"高",mo:"灰色的脚胜过灰色的屁股",fn:"くるぶし(日) Tank(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/65/2tazxmv3v4sea1z6vh7dbghw2bnoocd.png"},
+{n:"法蓝琪",g:"♀",s:"兔子",p:"成熟",pf:"成熟B型",m:1,d:22,c:"噜啦啦",h:"时尚",st:"优雅、绚丽",co:"蓝色、黑色",pt:"中",mo:"姐姐不懂妹妹的心",fn:"フランソワ(日) Francine(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d9/n00g59xqa96cfu7kjb085cpj2xocj3o.png"},
+{n:"柴姐",g:"♀",s:"犀牛",p:"大姐姐",pf:"大姐姐A型",m:5,d:28,c:"超强",h:"音乐",st:"酷、活跃",co:"紫色、黄色",pt:"高",mo:"血气方刚",fn:"おさい(日) Renée(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/e3/c3lbbdzgocb8qssvhixo79zwfmr9xq8.png"},
+{n:"妙妙",g:"♀",s:"兔子",p:"活泼",pf:"元气A型",m:3,d:3,c:"不妙",h:"游戏",st:"可爱、优雅",co:"浅蓝色、黄色",pt:"高",mo:"自行前往，就地解散",fn:"ミミィ(日) Bonbon(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bc/9vyim332hu5nsf827ptj8opwnrjokr7.png"},
+{n:"小桃",g:"♀",s:"松鼠",p:"活泼",pf:"元气B型",m:6,d:8,c:"就是唷",h:"时尚",st:"可爱",co:"红色、彩色",pt:"高",mo:"花落花开自有时",fn:"ももこ(日) Peanut(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/89/gpzswatfsel82x786vxqz41jyvuhv14.png"},
+{n:"爱睦",g:"♀",s:"绵羊",p:"成熟",pf:"成熟A型",m:4,d:2,c:"爱",h:"时尚",st:"绚丽、优雅",co:"紫色、米色",pt:"低",mo:"100%羊毛",fn:"ラムール(日) Cashmere(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/35/tbbis12vrf1qg8q1poys0030u4b7nc0.png"},
+{n:"软糖",g:"♀",s:"松鼠",p:"普通",pf:"普通B型",m:8,d:5,c:"甜甜",h:"教育",st:"可爱、优雅",co:"绿色、黄色",pt:"中",mo:"正能量",fn:"グミ(日) Poppy(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/ca/tin80dfsjanwhjgpg3d19a56rd83dr8.png"},
+{n:"阿二",g:"♀",s:"松鼠",p:"活泼",pf:"元气B型",m:7,d:2,c:"嘿唷",h:"健身",st:"活跃、简单",co:"蓝色、黑色",pt:"高",mo:"迅疾如风",fn:"２ごう(日) Agent S(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9e/q2zi9f8l8cxhz6ecfo64rlzsqmm5y3b.png"},
+{n:"温蒂",g:"♀",s:"绵羊",p:"大姐姐",pf:"大姐姐A型",m:7,d:16,c:"薯薯",h:"音乐",st:"活跃、可爱",co:"黄色、红色",pt:"高",mo:"得来速",fn:"ウェンディ(日) Frita(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/7mq0v32x7priwqdbtjod1jokas7pcdy.png"},
+{n:"嘉治",g:"♂",s:"松鼠",p:"暴躁",pf:"暴躁B型",m:9,d:14,c:"炯炯",h:"教育",st:"酷、简单",co:"蓝色、红色",pt:"低",mo:"自己的牙齿比亲戚重要",fn:"カジロウ(日) Ricky(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/88/faw8dqzaoiwdy5aydcd53reqz91901w.png"},
+{n:"小影",g:"♀",s:"松鼠",p:"成熟",pf:"成熟B型",m:7,d:3,c:"哼哼",h:"时尚",st:"绚丽、优雅",co:"橙色、棕色",pt:"中",mo:"少女的心与夏日的风",fn:"シルエット(日) Blaire(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6a/22xnhu86ba85vz1sc8a7ejfm7vsyob6.png"},
+{n:"梅丽诺",g:"♀",s:"绵羊",p:"成熟",pf:"成熟B型",m:11,d:26,c:"是的唷",h:"时尚",st:"可爱、绚丽",co:"白色、粉色",pt:"中",mo:"基因是不可战胜的",fn:"マリー(日) Willow(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9b/75lfwzz80r5zwdbu8wxotxaidsnkfa6.png"},
+{n:"克栗斯",g:"♂",s:"松鼠",p:"运动",pf:"运动A型",m:2,d:26,c:"鼓栗鼓栗",h:"游戏",st:"活跃、酷",co:"绿色、黄色",pt:"高",mo:"少年壮志",fn:"クリス(日) Sheldon(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bc/ekm2yudn1s5612zih4m7wwlu2ius8dq.png"},
+{n:"贾萝琳",g:"♀",s:"松鼠",p:"普通",pf:"普通B型",m:7,d:15,c:"你",h:"音乐",st:"可爱、绚丽",co:"彩色、白色",pt:"中",mo:"支支吾吾",fn:"キャロライン(日) Caroline(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/da/0ofd7l03sge6meme22rny0g5t4ji3hm.png"},
+{n:"彩星(三丽鸥联动)",g:"♀",s:"绵羊",p:"普通",pf:"普通A型",m:12,d:25,c:"毛茸茸",h:"音乐",st:"可爱、华丽",co:"水蓝色、粉红色",pt:"",mo:"Who knows what the stars have in store for us?",fn:"エトワール(日) Étoile(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/4a/48axz18yst5wfx2t4ar1ozi6igu9b1d.png"},
+{n:"彭澎",g:"♀",s:"绵羊",p:"大姐姐",pf:"大姐姐A型",m:2,d:14,c:"辛苦了",h:"音乐",st:"绚丽、优雅",co:"黑色、紫色",pt:"高",mo:"人以群分",fn:"フリル(日) Muffy(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/da/9fzg1ls7g5c3txuxphubiwooxbr4pnc.png"},
+{n:"小芹",g:"♀",s:"松鼠",p:"普通",pf:"普通B型",m:9,d:4,c:"啦啦",h:"自然",st:"可爱、优雅",co:"红色、绿色",pt:"中",mo:"缘分是无法解释的",fn:"パセリ(日) Cally(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/30/dxppkhuxf3hb0k98ojq5tv7qdypoisz.png"},
+{n:"瑞奇",g:"♂",s:"松鼠",p:"悠闲",pf:"悠闲A型",m:6,d:3,c:"是哦",h:"自然",st:"简单、可爱",co:"蓝色、白色",pt:"中",mo:"赤子之心",fn:"リッキー(日) Filbert(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c6/5mgfgi38q1z353mkz2rvc40yioowh6g.png"},
+{n:"贾洛斯",g:"♂",s:"绵羊",p:"自恋",pf:"自恋B型",m:5,d:8,c:"北鼻",h:"自然",st:"活跃、绚丽",co:"红色、绿色",pt:"高",mo:"旁观者清",fn:"カルロス(日) Curlos(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6b/da7keq4702or8uryye6gtuvaz8013aa.png"},
+{n:"小润",g:"♂",s:"松鼠",p:"自恋",pf:"自恋A型",m:9,d:29,c:"不管怎样",h:"音乐",st:"优雅、酷",co:"浅蓝色、蓝色",pt:"中",mo:"一期一会",fn:"ジュン(日) Marshal(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6e/g6cocxxla3629wil6gucwpl6ojtzmt7.png"},
+{n:"拉拉米",g:"♀",s:"松鼠",p:"普通",pf:"普通B型",m:6,d:19,c:"要是",h:"音乐",st:"简单、优雅",co:"白色、米色",pt:"中",mo:"熟读唐诗三百首，不会做诗也会吟",fn:"ララミー(日) Sally(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/21/3gugjnk28cr8qg8x1uki514uclxz3uw.png"},
+{n:"皮耶罗",g:"♂",s:"绵羊",p:"自恋",pf:"自恋A型",m:4,d:19,c:"丑丑",h:"音乐",st:"绚丽、简单",co:"彩色、红色",pt:"中",mo:"宛如小丑",fn:"ジュペッティ(日) Pietro(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/97/hu80fyzr8qbhkb20k13iau0rsc6yihf.png"},
+{n:"娜塔丽",g:"♀",s:"松鼠",p:"成熟",pf:"成熟A型",m:11,d:30,c:"做得好",h:"健身",st:"优雅、绚丽",co:"米色、灰色",pt:"低",mo:"世上没有不透风的墙",fn:"ナターシャ(日) Tasha(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/40/a2ajfmigfx0750e4tboeb956k1i9ies.png"},
+{n:"雷贝嘉",g:"♀",s:"松鼠",p:"成熟",pf:"成熟B型",m:9,d:10,c:"正经",h:"时尚",st:"优雅、绚丽",co:"紫色、米色",pt:"中",mo:"以画自省",fn:"レベッカ(日) Pecan(英)",img:"https://patchwiki.biligame.com/images/dongsen/4/42/tfcendmm114460krzuncw38g35toxmc.png"},
+{n:"雪花",g:"♀",s:"绵羊",p:"活泼",pf:"元气B型",m:8,d:15,c:"一丝丝",h:"时尚",st:"酷、绚丽",co:"红色、绿色",pt:"高",mo:"雨天顺延",fn:"みぞれ(日) Wendy(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/81/6giwy3r977txgkka02n3rlk3x4gzu1a.png"},
+{n:"闪电",g:"♂",s:"松鼠",p:"暴躁",pf:"暴躁B型",m:7,d:9,c:"闪闪",h:"音乐",st:"酷、活跃",co:"黑色、黄色",pt:"低",mo:"多姿多彩的人生",fn:"スパーク(日) Static(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/51/5qe9feuth9m0juhd3y7xb179dwfvsqn.png"},
+{n:"茶茶丸",g:"♂",s:"绵羊",p:"运动",pf:"运动A型",m:3,d:18,c:"哇耶",h:"游戏",st:"活跃、可爱",co:"红色、彩色",pt:"高",mo:"天真烂漫",fn:"ちゃちゃまる(日) Dom(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d7/orr001b5scgm12acutroxom53ypwy4t.png"},
+{n:"孟珮",g:"♀",s:"松鼠",p:"普通",pf:"普通A型",m:10,d:22,c:"咻",h:"自然",st:"可爱、简单",co:"绿色、紫色",pt:"中",mo:"庄周梦蝶",fn:"もんぺ(日) Sylvana(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/14/3oxpxd38p755jomjc4jit9im19tuka0.png"},
+{n:"咬咬",g:"♀",s:"松鼠",p:"活泼",pf:"元气B型",m:7,d:19,c:"咯吱咯吱",h:"时尚",st:"可爱、活跃",co:"红色、黄色",pt:"高",mo:"红颜薄命",fn:"ガリガリ(日) Nibbles(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9a/nhzwz0iex2z2u7zsy46o0xs7xvf5wj9.png"},
+{n:"阿司",g:"♀",s:"绵羊",p:"成熟",pf:"成熟A型",m:10,d:21,c:"等啊",h:"教育",st:"优雅、绚丽",co:"绿色、棕色",pt:"低",mo:"万绿丛中一点红",fn:"つかさ(日) Timbra(英)",img:"https://patchwiki.biligame.com/images/dongsen/0/00/l0cf2ywp1xge6fp871oqfclqzy0nz4x.png"},
+{n:"小敏",g:"♀",s:"松鼠",p:"成熟",pf:"成熟B型",m:5,d:2,c:"喔哼",h:"时尚",st:"绚丽、可爱",co:"粉色、紫色",pt:"中",mo:"色彩缤纷的世界",fn:"ミント(日) Mint(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/ca/tsp10ljuqsd4kvz943x0dbltz0zip3h.png"},
+{n:"范妮沙",g:"♀",s:"狼",p:"成熟",pf:"成熟A型",m:1,d:26,c:"喔呵呵",h:"教育",st:"绚丽、优雅",co:"灰色、紫色",pt:"低",mo:"西装内里就是这样",fn:"ヴァネッサ(日) Vivian(英)",img:"https://patchwiki.biligame.com/images/dongsen/f/f6/al2ebe3fm8b9mvrurrxbh3ux2xitl33.png"},
+{n:"马丽莲",g:"♀",s:"老虎",p:"成熟",pf:"成熟A型",m:11,d:22,c:"啊哈",h:"音乐",st:"绚丽、优雅",co:"紫色、白色",pt:"低",mo:"破镜重圆",fn:"マリリン(日) Claudia(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b4/hompta8by1y633ydqmp8uldja6mh7bd.png"},
+{n:"毕安卡",g:"♀",s:"狼",p:"成熟",pf:"成熟B型",m:9,d:17,c:"漂亮",h:"时尚",st:"优雅、酷",co:"蓝色、浅蓝色",pt:"中",mo:"人穷志不穷",fn:"ビアンカ(日) Whitney(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1f/0dktb2cyzk4my0h0wrn6k4qzei5fu47.png"},
+{n:"戈麦斯",g:"♂",s:"老虎",p:"运动",pf:"运动B型",m:8,d:26,c:"完全",h:"健身",st:"活跃、简单",co:"浅蓝色、灰色",pt:"高",mo:"热情风暴",fn:"ゴメス(日) Rowan(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/bc/h937s6xnou6mc9h6ytnx55jsoodda9v.png"},
+{n:"百合",g:"♀",s:"狼",p:"普通",pf:"普通A型",m:3,d:24,c:"花花",h:"音乐",st:"可爱",co:"蓝色、白色",pt:"中",mo:"落花有意，流水无情",fn:"リリィ(日) Skye(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/38/0yr4p5kk01pxlda7crx34dnmt9siklv.png"},
+{n:"小雪",g:"♀",s:"老虎",p:"活泼",pf:"元气A型",m:12,d:13,c:"雪豹",h:"游戏",st:"可爱",co:"粉色、橙色",pt:"高",mo:"月下老人",fn:"コユキ(日) Bianca(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/71/62iqqf2n75p9lu9kofx9rjwyku7bknj.png"},
+{n:"阿研",g:"♂",s:"狼",p:"暴躁",pf:"暴躁A型",m:2,d:17,c:"咳呵",h:"自然",st:"简单、酷",co:"棕色、米色",pt:"中",mo:"穿过隧道，冰天雪地",fn:"けん(日) Dobie(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/78/jb1yvqgwlfkvbxq7bnh9p2knmd1zd18.png"},
+{n:"谷丰",g:"♂",s:"老虎",p:"运动",pf:"运动A型",m:8,d:19,c:"虎虎",h:"游戏",st:"活跃、简单",co:"蓝色、紫色",pt:"高",mo:"全力以赴",fn:"ハリマオ(日) Tybalt(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7f/jwsyvjwcpppqz3tiql686zchylfww3m.png"},
+{n:"李可",g:"♂",s:"狼",p:"自恋",pf:"自恋A型",m:12,d:6,c:"喔耶",h:"音乐",st:"绚丽、酷",co:"黑色、白色",pt:"中",mo:"黄鼠狼给鸡拜年",fn:"リカルド(日) Kyle(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/eb/jcjwvzzmjk45jb9k5birc565es5m8yv.png"},
+{n:"施傅",g:"♂",s:"狼",p:"暴躁",pf:"暴躁B型",m:12,d:19,c:"不是嘛",h:"音乐",st:"酷、简单",co:"白色、灰色",pt:"低",mo:"他山之石，可以为错",fn:"チーフ(日) Chief(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/91/g1egdrwvc36wsoyb04qc200964s4vo9.png"},
+{n:"冰冰",g:"♀",s:"狼",p:"成熟",pf:"成熟B型",m:12,d:14,c:"就是说哇",h:"时尚",st:"优雅、酷",co:"绿色、蓝色",pt:"中",mo:"香气袭人",fn:"ツンドラ(日) Freya(英)",img:"https://patchwiki.biligame.com/images/dongsen/5/54/hb8mz0w85y37bhihntt2lg2sgoh6uhd.png"},
+{n:"卢姿",g:"♀",s:"老虎",p:"活泼",pf:"元气B型",m:8,d:27,c:"是喔",h:"时尚",st:"绚丽、可爱",co:"黄色、绿色",pt:"高",mo:"反射神经",fn:"ルーズ(日) Bangle(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c2/b5laxy8ycy0mskwkunh92mb0mie9f9i.png"},
+{n:"莫妮卡",g:"♀",s:"狼",p:"活泼",pf:"元气A型",m:8,d:31,c:"呀哈",h:"健身",st:"可爱、活跃",co:"绿色、白色",pt:"高",mo:"憧憬未来的我",fn:"モニカ(日) Audie(英)",img:"https://patchwiki.biligame.com/images/dongsen/6/6b/knbp2rll0jrxv0dg852v7vfd526dxxn.png"},
+{n:"潘奇隆",g:"♂",s:"狼",p:"暴躁",pf:"暴躁B型",m:11,d:5,c:"不然呢",h:"教育",st:"酷、活跃",co:"黑色、米色",pt:"低",mo:"三人成狼",fn:"ブンジロウ(日) Lobo(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/gzvtv3f7vwubiyhszmufw8xuyso33jw.png"},
+{n:"艾栗丝",g:"♀",s:"松鼠",p:"大姐姐",pf:"大姐姐A型",m:8,d:30,c:"当然哦",h:"游戏",st:"活跃、可爱",co:"红色、黄色",pt:"高",mo:"切忌躁进",fn:"アイリス(日) Hazel(英)",img:"https://patchwiki.biligame.com/images/dongsen/2/2b/56zv4rn61ilgrau9ew8248ofkd6s5o2.png"},
+{n:"史培亚",g:"♂",s:"狼",p:"暴躁",pf:"暴躁B型",m:12,d:18,c:"这倒是",h:"教育",st:"简单、酷",co:"白色、浅蓝色",pt:"低",mo:"灰色比纯黑更好",fn:"シベリア(日) Fang(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/1a/auyz5rbgrl3lq22lk6032qaw9nsf81x.png"},
+{n:"阿彪",g:"♂",s:"老虎",p:"运动",pf:"运动B型",m:5,d:15,c:"但是",h:"健身",st:"活跃、绚丽",co:"红色、蓝色",pt:"高",mo:"术业有专攻",fn:"ヒョウタ(日) Leonardo(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/cf/2tycl7qyndgzoz90sxad3rztqaj284p.png"},
+{n:"罗博",g:"♂",s:"狼",p:"暴躁",pf:"暴躁B型",m:11,d:25,c:"罗罗",h:"教育",st:"酷、活跃",co:"黑色、绿色",pt:"低",mo:"画蛇不必添足",fn:"ロボ(日) Wolfgang(英)",img:"https://patchwiki.biligame.com/images/dongsen/b/b0/6sc4r820h43gljz7rlp92a37qbzbufp.png"},
+{n:"朱穆朗",g:"♂",s:"老虎",p:"暴躁",pf:"暴躁B型",m:8,d:22,c:"王",h:"健身",st:"酷、活跃",co:"蓝色、黑色",pt:"低",mo:"前有狼后有虎",fn:"チョモラン(日) Rolf(英)",img:"https://patchwiki.biligame.com/images/dongsen/e/ed/ezffzxnypqy04hnnmnj8xaezpgsor29.png"},
+{n:"蜜雪儿(2.0新增)",g:"♂",s:"兔子",p:"悠闲",pf:"悠闲B型",m:5,d:19,c:"妹妹头",h:"时尚",st:"简单、可爱",co:"蓝色、白色",pt:"",mo:"机不可失，时不再来",fn:"ミッチェル(日) Sasha(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/s920582mvpg7gll2w9f3rbcd43i1h0c.png"},
+{n:"穗星(2.0新增)",g:"♀",s:"松鼠",p:"普通",pf:"普通B型",m:9,d:11,c:"亮晶晶",h:"时尚",st:"酷、可爱",co:"白色、黑色",pt:"",mo:"星星之火可以燎原",fn:"スピカ(日) Ione(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/aeqcqvvlmhgc4o8wd42hc10j7g8c4je.png"},
+{n:"天圣(2.0新增)",g:"♂",s:"猴子",p:"运动",pf:"运动B型",m:8,d:18,c:"好好",h:"健身",st:"酷、优雅",co:"绿色、黄色",pt:"",mo:"如来佛的手掌心",fn:"テンシン(日) Tiansheng(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3d/p84mqz6qzykt8tovxo3sz78fv8h6up4.png"},
+{n:"佳芝(2.0新增)",g:"♀",s:"鹿",p:"活泼",pf:"元气A型",m:10,d:31,c:"总芝",h:"教育",st:"优雅、华丽",co:"红色、黑色",pt:"",mo:"远亲不如近邻",fn:"よしの(日) Shino(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7b/8sih4q71xkdusb8l7jni52oacs56sxy.png"},
+{n:"胖督(2.0新增)",g:"♂",s:"仓鼠",p:"暴躁",pf:"暴躁B型",m:6,d:26,c:"所以喽",h:"教育",st:"酷、华丽",co:"黑色、棕色",pt:"",mo:"大道废，有仁义",fn:"ドンチャン(日) Marlo(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/17/km7ls2iorziujqtkdikksjvvda32goj.png"},
+{n:"理佳(2.0新增)",g:"♀",s:"老鼠",p:"成熟",pf:"成熟A型",m:10,d:23,c:"嗯啊",h:"教育",st:"简单、酷",co:"白色、灰色",pt:"",mo:"脱氧核糖核酸",fn:"リカ(日) Petri(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/ac/csom1oybk944u11aorh3h2cu7c9lbjw.png"},
+{n:"吉格尔(2.0新增)",g:"♂",s:"章鱼",p:"自恋",pf:"自恋B型",m:4,d:1,c:"发动",h:"游戏",st:"简单、积极",co:"黑色、白色",pt:"",mo:"我是外星人",fn:"ギーガー(日) Cephalobot(英)",img:"https://patchwiki.biligame.com/images/dongsen/8/81/sgeosw9xwjhv4bt0tr6130bsoh2vmo0.png"},
+{n:"席恩(2.0新增)",g:"♀",s:"老鹰",p:"大姐姐",pf:"大姐姐A型",m:1,d:20,c:"好好做",h:"教育",st:"酷、优雅",co:"黑色、白色",pt:"",mo:"所谓宽恕，就是鞋底的三色堇所散发的芳香",fn:"シオン(日) Quinn(英)",img:"https://patchwiki.biligame.com/images/dongsen/1/11/167is3kix51xtth1qo6vldopbciqedv.png"},
+{n:"羽毛(2.0回归)",g:"♂",s:"鸟",p:"运动",pf:"运动A型",m:8,d:11,c:"是也",h:"自然",st:"积极、可爱",co:"水蓝色、绿色",pt:"",mo:"欲擒故纵",fn:"フェザー(日) Ace(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/ae/hm64n7dciv4eoj1mnfcir5fmcnspva5.png"},
+{n:"勒内卢(2.0回归)",g:"♀",s:"鸵鸟",p:"活泼",pf:"元气B型",m:9,d:10,c:"铃铃",h:"音乐",st:"酷、可爱",co:"橘色、绿色",pt:"",mo:"每日补充营养",fn:"デジャネイロ(日) Rio(英)",img:"https://patchwiki.biligame.com/images/dongsen/3/3e/frw0w0o5b2ujafxehy0sjj8yuxqkhg3.png"},
+{n:"米粉(2.0回归)",g:"♀",s:"食蚁兽",p:"普通",pf:"普通B型",m:2,d:10,c:"粉粉",h:"教育",st:"可爱、简单",co:"粉红色、白色",pt:"",mo:"切莫不看就签字",fn:"ビーフン(日) Zoe(英)",img:"https://patchwiki.biligame.com/images/dongsen/7/7c/t1tqwau19jon3rn0raewp3ctn1z9jd6.png"},
+{n:"游琪(2.0回归)",g:"♀",s:"考拉",p:"大姐姐",pf:"大姐姐B型",m:3,d:21,c:"香脆",h:"音乐",st:"优雅、可爱",co:"红色、白色",pt:"中",mo:"无念无想",fn:"マーチ(日) Faith(英)",img:"https://patchwiki.biligame.com/images/dongsen/d/d4/7aljui7zr8laozp1uitnute0f4v966e.png"},
+{n:"碧芊(2.0回归)",g:"♀",s:"犀牛",p:"成熟",pf:"成熟B型",m:12,d:18,c:"谢谢",h:"自然",st:"优雅、华丽",co:"紫色、粉红色",pt:"",mo:"赏花不如赏鼻子",fn:"ペチュニア(日) Azalea(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/90/21g0tz0ywztpfd6qr3jwbr9px68nwgs.png"},
+{n:"信雄(2.0回归)",g:"♂",s:"企鹅",p:"悠闲",pf:"悠闲A型",m:12,d:24,c:"嘟哝",h:"游戏",st:"可爱、积极",co:"黄色、灰色",pt:"",mo:"困意、雾气、寒意",fn:"のぶお(日) Chabwick(英)",img:"https://patchwiki.biligame.com/images/dongsen/9/9e/8bm44xogzv78otypju8i881582i7u9u.png"},
+{n:"祥平(2.0回归)",g:"♂",s:"狗",p:"暴躁",pf:"暴躁B型",m:10,d:30,c:"唉",h:"音乐",st:"酷、积极",co:"灰色、棕色",pt:"",mo:"盛极一时",fn:"シャンペン(日) Frett(英)",img:"https://patchwiki.biligame.com/images/dongsen/c/c0/487qbcwc2rrfk389lzqf90r5ozqy4ut.png"},
+{n:"皮隆孔(2.0回归)",g:"♂",s:"鳄鱼",p:"自恋",pf:"自恋A型",m:5,d:2,c:"吼吼",h:"自然",st:"简单、优雅",co:"米色、棕色",pt:"",mo:"不明飞行物",fn:"ピロンコン(日) Roswell(英)",img:"https://patchwiki.biligame.com/images/dongsen/a/a2/busliytwfcoc3swnvkxbfws6y4m3yjf.png"}
+];
+
+/* ====================================================================
+   种族 emoji 映射
+   ==================================================================== */
+const SPECIES_EMOJI = {
+  "猫":"🐱","兔子":"🐰","青蛙":"🐸","狗":"🐶","鸭":"🦆","马":"🐴",
+  "鸵鸟":"🦩","松鼠":"🐿️","老鼠":"🐭","大熊":"🐻","鸟":"🐦","猪":"🐷",
+  "小熊":"🧸","企鹅":"🐧","狼":"🐺","鸡":"🐔","猩猩":"🦍","牛":"🐂",
+  "袋鼠":"🦘","老鹰":"🦅","鹿":"🦌","猴子":"🐵","犀牛":"🦏","食蚁兽":"🐜",
+  "象":"🐘","山羊":"🐐","绵羊":"🐑","考拉":"🐨","老虎":"🐯","鳄鱼":"🐊",
+  "仓鼠":"🐹","狮子":"🦁","河马":"🦛","章鱼":"🐙","奶牛":"🐄"
+};
+
+/* ====================================================================
+   性格描述 & 徽章颜色
+   ==================================================================== */
+const PERSONALITY_INFO = {
+  "悠闲":   { emoji:"😴", color:"#FFE7A6", desc:"慵懒的美食家，一天的灵感都从吃和睡中来。" },
+  "运动":   { emoji:"💪", color:"#CFE8B8", desc:"体能满分热血派，活力四射一跑一整天。" },
+  "普通":   { emoji:"🌼", color:"#FBE1E8", desc:"温柔小天使，对谁都友善，是岛上的治愈系。" },
+  "暴躁":   { emoji:"🔥", color:"#FDC9B5", desc:"嘴硬心软的刀子嘴豆腐心，骂骂咧咧最可爱。" },
+  "活泼":   { emoji:"🎀", color:"#FFD1E0", desc:"元气满满小迷妹，追星吃瓜整活能手。" },
+  "成熟":   { emoji:"💎", color:"#E0D3F5", desc:"高冷优雅大小姐，品味一流嘴巴略毒。" },
+  "自恋":   { emoji:"😎", color:"#CDE8F0", desc:"风度翩翩小绅士，自信到骨子里的迷人派。" },
+  "大姐姐": { emoji:"🥊", color:"#FFD9B3", desc:"豪爽仗义好大姐，出事我先上，夹心软糖属性。" }
+};
+
+/* ====================================================================
+   问题库：8 道性格题 + 6 道种族题
+   personalityDelta：各性格权重
+   speciesDelta：对该组种族每一只 +w
+   ==================================================================== */
+const P_LIST = ["悠闲","运动","普通","暴躁","活泼","成熟","自恋","大姐姐"];
+
+const QUESTIONS = [
+  /* --------- 性格题 --------- */
+  {
+    kind:"p",
+    q:"早上闹钟响起时，你的第一反应是？",
+    opts:[
+      { e:"😪", t:"再躺会儿…5分钟…再5分钟", pd:{悠闲:2, 普通:1} },
+      { e:"💥", t:"一跃而起！今天也要元气满满！", pd:{运动:2, 活泼:1} },
+      { e:"☕", t:"按掉闹钟慢悠悠起床，先喝杯茶", pd:{普通:2, 成熟:1} },
+      { e:"😤", t:"\"吵死了！\"嘴里抱怨着还是起床", pd:{暴躁:2, 大姐姐:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"朋友临时邀请你去聚会，你会？",
+    opts:[
+      { e:"🎉", t:"去去去！开 party 啦啦啦！", pd:{活泼:2, 运动:1} },
+      { e:"💅", t:"去的话要精心搭配一下造型", pd:{成熟:2, 自恋:1} },
+      { e:"🛋️", t:"不太想去，家里舒服", pd:{悠闲:2, 暴躁:1} },
+      { e:"🤝", t:"去！顺便照顾下社恐的朋友", pd:{大姐姐:2, 普通:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"镜子里看到自己，你最常想的是？",
+    opts:[
+      { e:"🌸", t:"嗯……今天也很可爱呀", pd:{普通:2, 活泼:1} },
+      { e:"✨", t:"真帅！完美！再自拍一张", pd:{自恋:2, 成熟:1} },
+      { e:"🧴", t:"头发又乱了，随便啦反正没人看", pd:{悠闲:2, 暴躁:1} },
+      { e:"🏋️", t:"肌肉线条不错！继续保持", pd:{运动:2, 大姐姐:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"遇到了不太喜欢的人，你会？",
+    opts:[
+      { e:"🙂", t:"保持礼貌但保持距离", pd:{成熟:2, 普通:1} },
+      { e:"💢", t:"当面就怼回去，没在怕的", pd:{暴躁:2, 大姐姐:1} },
+      { e:"😶", t:"假装没看见，懒得理", pd:{自恋:2, 悠闲:1} },
+      { e:"🤗", t:"试着理解对方，也许他有苦衷", pd:{普通:2, 运动:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"你和朋友最爱聊的话题是？",
+    opts:[
+      { e:"📣", t:"新出的偶像 / 动漫 / 网络热梗", pd:{活泼:2, 普通:1} },
+      { e:"⚽", t:"运动、健身、游戏竞技", pd:{运动:2, 暴躁:1} },
+      { e:"🍰", t:"美食、零食、哪家店有新甜品", pd:{悠闲:2, 大姐姐:1} },
+      { e:"👗", t:"时尚、美容、有品味的生活小物", pd:{成熟:2, 自恋:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"收到朋友送的礼物，你的反应是？",
+    opts:[
+      { e:"🤩", t:"\"哇啊啊啊太棒啦！\" 蹦起来", pd:{活泼:2, 运动:1} },
+      { e:"🥰", t:"\"谢谢你～\" 温柔地笑", pd:{普通:2, 悠闲:1} },
+      { e:"🧐", t:"\"哦，是我喜欢的风格呢\" 认真欣赏", pd:{成熟:2, 自恋:1} },
+      { e:"😳", t:"\"你…干嘛突然送我\" 嘴硬红了眼", pd:{暴躁:2, 大姐姐:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"朋友遇到麻烦被欺负了，你会？",
+    opts:[
+      { e:"🥊", t:"冲过去帮他打回来！", pd:{大姐姐:2, 运动:1} },
+      { e:"🫂", t:"耐心陪他，好好安慰", pd:{普通:2, 悠闲:1} },
+      { e:"🧠", t:"冷静分析给他最实用的建议", pd:{成熟:2, 自恋:1} },
+      { e:"🙄", t:"\"活该！\" 嘴上这么说还是伸手拉他", pd:{暴躁:2, 活泼:1} }
+    ]
+  },
+  {
+    kind:"p",
+    q:"一个完整的周末，你最想怎么过？",
+    opts:[
+      { e:"🛌", t:"睡一整天 + 零食不停", pd:{悠闲:2, 普通:1} },
+      { e:"🏃", t:"健身房撸铁、跑步、户外暴走", pd:{运动:2, 大姐姐:1} },
+      { e:"🛍️", t:"逛街 + 咖啡馆 + 自拍", pd:{自恋:2, 成熟:1} },
+      { e:"🎤", t:"和朋友疯玩一整天", pd:{活泼:2, 暴躁:1} }
+    ]
+  },
+
+  /* --------- 种族题 --------- */
+  {
+    kind:"s",
+    q:"你最喜欢待在什么环境里？",
+    opts:[
+      { e:"🌊", t:"海边 / 河边 / 游泳池", sl:["青蛙","鸭","企鹅","河马","鳄鱼","章鱼"] },
+      { e:"🌳", t:"森林里，最好能爬树", sl:["松鼠","考拉","猩猩","猴子","鸟","老鹰"] },
+      { e:"🌾", t:"宽阔的草原 / 田野", sl:["马","牛","奶牛","绵羊","山羊","犀牛","象","鸵鸟","鹿"] },
+      { e:"🏠", t:"温暖小窝 / 房间里", sl:["猫","狗","兔子","仓鼠","老鼠","小熊","大熊"] },
+      { e:"🔥", t:"热带丛林 / 岩石地带", sl:["老虎","狮子","狼","食蚁兽","袋鼠","猪"] },
+      { e:"❄️", t:"冷冷的雪地或极地", sl:["企鹅","大熊","狼"] }
+    ]
+  },
+  {
+    kind:"s",
+    q:"你的饮食偏好？",
+    opts:[
+      { e:"🍎", t:"水果最棒！", sl:["猴子","猩猩","松鼠","鸟"] },
+      { e:"🥩", t:"无肉不欢！", sl:["老虎","狮子","狼","老鹰","大熊","鳄鱼"] },
+      { e:"🥬", t:"蔬菜 / 草料", sl:["马","牛","奶牛","绵羊","山羊","犀牛","象","兔子","鹿"] },
+      { e:"🐟", t:"小鱼小虾海产品", sl:["猫","青蛙","鸭","企鹅","章鱼","河马"] },
+      { e:"🌰", t:"坚果 / 种子 / 谷物", sl:["松鼠","仓鼠","老鼠","鸡","鸵鸟","鸟"] },
+      { e:"🍱", t:"杂食，什么都吃", sl:["猪","狗","小熊","考拉","食蚁兽"] }
+    ]
+  },
+  {
+    kind:"s",
+    q:"朋友用一个词形容你，最可能是？",
+    opts:[
+      { e:"😤", t:"凶猛 / 霸气", sl:["老虎","狮子","狼","鳄鱼","老鹰","犀牛"] },
+      { e:"🥹", t:"可爱 / 小巧", sl:["猫","兔子","小熊","仓鼠","松鼠","鹿"] },
+      { e:"🗿", t:"高大 / 强壮", sl:["象","犀牛","河马","大熊","牛","马","鸵鸟"] },
+      { e:"🎭", t:"奇特 / 有趣", sl:["章鱼","食蚁兽","考拉","鸭","猩猩","袋鼠"] },
+      { e:"🌷", t:"温柔 / 乖巧", sl:["绵羊","山羊","奶牛","鸡","鹿","鸭"] },
+      { e:"🤹", t:"灵巧 / 机灵", sl:["猴子","松鼠","猫","青蛙","老鼠","鸟"] }
+    ]
+  },
+  {
+    kind:"s",
+    q:"你平时的动作姿态？",
+    opts:[
+      { e:"🥱", t:"慢悠悠的，爱打盹", sl:["考拉","大熊","河马","章鱼","猪"] },
+      { e:"🐇", t:"蹦蹦跳跳停不下来", sl:["兔子","袋鼠","青蛙","松鼠","鹿"] },
+      { e:"😎", t:"威风凛凛目不斜视", sl:["狮子","老虎","老鹰","犀牛","牛"] },
+      { e:"💃", t:"步伐优雅，姿态好看", sl:["鹿","马","猫","绵羊"] },
+      { e:"🤸", t:"手脚麻利，动作敏捷", sl:["猴子","猩猩","老鼠","仓鼠","鸡"] },
+      { e:"🚶", t:"不紧不慢迈着小碎步", sl:["狗","小熊","鸭","企鹅","食蚁兽"] }
+    ]
+  },
+  {
+    kind:"s",
+    q:"你衣柜里最多的颜色是？",
+    opts:[
+      { e:"🟫", t:"棕 / 灰 / 大地色", sl:["狼","大熊","老鼠","狗","马","小熊","犀牛","象","河马","老虎","食蚁兽"] },
+      { e:"🌸", t:"粉嫩 / 奶油色", sl:["兔子","猫","小熊","绵羊","仓鼠","鸡","猪"] },
+      { e:"🌿", t:"绿色 / 鲜黄", sl:["青蛙","鸟","鳄鱼","山羊","鸭"] },
+      { e:"🤍", t:"白色 / 米色", sl:["绵羊","兔子","鸭","奶牛","山羊","考拉","企鹅","仓鼠"] },
+      { e:"🖤", t:"黑色 / 深色系", sl:["企鹅","狮子","老虎","章鱼","猩猩","老鹰","牛","狼"] },
+      { e:"🌈", t:"彩虹色 / 花花绿绿", sl:["鸟","章鱼","猴子","鸭","袋鼠"] }
+    ]
+  },
+  {
+    kind:"s",
+    q:"你觉得自己最拿得出手的小本领是？",
+    opts:[
+      { e:"🎶", t:"唱歌好听", sl:["鸟","鸡","鸭","青蛙","猫"] },
+      { e:"💪", t:"力气超大 / 很能打", sl:["牛","犀牛","大熊","狮子","象","河马","猩猩","袋鼠"] },
+      { e:"🏃", t:"跑得飞快", sl:["马","鸵鸟","狼","鹿"] },
+      { e:"🧗", t:"爬树 / 攀爬高手", sl:["松鼠","猴子","猩猩","考拉","猫"] },
+      { e:"🏊", t:"水中畅游", sl:["青蛙","鸭","企鹅","章鱼","河马","鳄鱼"] },
+      { e:"🕳️", t:"挖洞 / 钻小缝", sl:["兔子","仓鼠","老鼠","食蚁兽","小熊"] }
+    ]
+  }
+];
+
+/* ====================================================================
+   状态
+   ==================================================================== */
+const state = {
+  idx: 0,
+  answers: new Array(QUESTIONS.length).fill(-1),
+  month: 1, day: 1,
+  currentMatch: null
+};
+
+/* ============ DOM 工具 ============ */
+const $ = sel => document.querySelector(sel);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'instant' });
+}
+
+/* ============ 初始化生日选择器 ============ */
+(function initBirthday(){
+  const m = $('#sel-month'), d = $('#sel-day');
+  for (let i=1; i<=12; i++) m.innerHTML += `<option value="${i}">${i}</option>`;
+  const rebuildDays = () => {
+    const mv = +m.value;
+    const last = [31,29,31,30,31,30,31,31,30,31,30,31][mv-1];
+    const cur = Math.min(+d.value || 1, last);
+    d.innerHTML = '';
+    for (let i=1; i<=last; i++) d.innerHTML += `<option value="${i}" ${i===cur?'selected':''}>${i}</option>`;
+  };
+  m.addEventListener('change', rebuildDays);
+  m.value = 1; d.innerHTML = '<option value="1">1</option>'; rebuildDays();
+})();
+
+/* ============ 渲染问题 ============ */
+function renderQuestion() {
+  const i = state.idx;
+  const q = QUESTIONS[i];
+  $('#progress-bar').style.width = ((i) / QUESTIONS.length * 100) + '%';
+  $('#progress-text').textContent = `${i+1} / ${QUESTIONS.length}`;
+  $('#q-label').textContent = `${q.kind==='p'?'🌿 性格':'🐾 种族'} · 第 ${String(i+1).padStart(2,'0')} 题`;
+  $('#q-text').textContent = q.q;
+  const wrap = $('#q-options');
+  wrap.innerHTML = '';
+  q.opts.forEach((o, k) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-emoji">${o.e}</span><span class="opt-text">${o.t}</span>`;
+    btn.addEventListener('click', () => selectOption(k));
+    wrap.appendChild(btn);
+  });
+  $('#btn-prev').disabled = (i === 0);
+}
+
+function selectOption(k) {
+  state.answers[state.idx] = k;
+  if (state.idx < QUESTIONS.length - 1) {
+    state.idx++;
+    renderQuestion();
+  } else {
+    $('#progress-bar').style.width = '100%';
+    $('#progress-text').textContent = `${QUESTIONS.length} / ${QUESTIONS.length}`;
+    showScreen('#screen-birthday');
+  }
+}
+
+/* ============ 匹配算法 ============
+   给每位岛民打分：
+     score = personalityScore[villager.p] + speciesScore[villager.s]
+   再用生日绝对天数差作为 tiebreak（越近越优先）。
+   ====================================================================
+   为保证每位岛民都可被选出：
+     - 用户只要答题把自己的种族与性格都推到"对应桶"最高，
+       并且输入该岛民的生日，那么该岛民就一定是得分最高且生日最近的唯一解。
+   ==================================================================== */
+function computeScores() {
+  const pScore = {}; P_LIST.forEach(p => pScore[p] = 0);
+  const sScore = {};
+
+  state.answers.forEach((ai, qi) => {
+    if (ai < 0) return;
+    const q = QUESTIONS[qi];
+    const opt = q.opts[ai];
+    if (q.kind === 'p') {
+      for (const k in opt.pd) pScore[k] = (pScore[k]||0) + opt.pd[k];
+    } else {
+      opt.sl.forEach(s => { sScore[s] = (sScore[s]||0) + 3; });
+    }
+  });
+
+  // 岛民总分
+  const userDay = dayOfYear(state.month, state.day);
+  const scored = VILLAGERS.map(v => {
+    const total = (pScore[v.p]||0) + (sScore[v.s]||0);
+    const vDay = dayOfYear(v.m, v.d);
+    const dist = Math.min(
+      Math.abs(userDay - vDay),
+      366 - Math.abs(userDay - vDay)
+    );
+    return { v, total, dist };
+  });
+
+  scored.sort((a,b) =>
+    b.total - a.total ||       // 总分高优先
+    a.dist - b.dist ||         // 生日接近优先
+    a.v.n.localeCompare(b.v.n) // 稳定排序
+  );
+  return { scored, pScore, sScore };
+}
+
+function dayOfYear(m, d) {
+  const accum = [0,31,60,91,121,152,182,213,244,274,305,335];
+  return accum[m-1] + d;
+}
+
+/* ============ 渲染结果 ============ */
+function renderResult() {
+  const { scored, pScore, sScore } = computeScores();
+  const best = scored[0];
+  const v = best.v;
+  const topTotal = scored[0].total || 1;
+  // 匹配度：把 topTotal 映射到 80%~99%（保证好看）
+  const matchPct = Math.min(99, 80 + Math.round((best.total / (16 + 18)) * 19)); // 16=8性格题最高 p*2, 18=6种族题*3
+
+  // 载立绘（来自 Bilibili Wiki），失败回退 emoji
+  const fb = $('#r-portrait-fb');
+  const img = $('#r-portrait');
+  if (v.img) {
+    img.style.display = '';
+    fb.style.display = 'none';
+    img.onerror = () => {
+      img.style.display = 'none';
+      fb.style.display = '';
+      fb.textContent = SPECIES_EMOJI[v.s] || '🐾';
+    };
+    img.src = v.img;
+    img.alt = v.n;
+  } else {
+    img.style.display = 'none';
+    fb.style.display = '';
+    fb.textContent = SPECIES_EMOJI[v.s] || '🐾';
+  }
+  $('#r-name').textContent = v.n + (v.g||'');
+  $('#r-jp').textContent = v.fn ? v.fn : '';
+
+  const pi = PERSONALITY_INFO[v.p] || { emoji:'', color:'#eee', desc:'' };
+  const pfLabel = v.pf || v.p;
+  $('#r-tags').innerHTML = `
+    <span class="tag">${SPECIES_EMOJI[v.s]||''} ${v.s}</span>
+    <span class="tag" style="background:${pi.color}">${pi.emoji} ${pfLabel}</span>
+    ${v.mo?`<span class="tag">📜 ${v.mo}</span>`:''}
+  `;
+  $('#r-desc').innerHTML = `
+    <b>${v.n}</b> 是一只 <b>${pfLabel}</b> 系的 <b>${v.s}</b>${v.g?`（${v.g}）`:''}。<br>
+    ${pi.desc}<br>
+    <span style="color:var(--animal-text-2)">—— 根据你的回答和生日，ta 是 413 位岛民里和你最像的那一只！</span>
+  `;
+  $('#r-birth').textContent = `${v.m}月${v.d}日`;
+  $('#r-score').textContent = matchPct + '%';
+  // 保存当前选中岛民，供 "查看详情" 使用
+  state.currentMatch = v;
+
+  /* 相似岛民：在"除第一名之外的前排"里挑 6 只，保证种族多样化。
+     策略：
+       1) 取除自己外的前 40 名候选；
+       2) 每个种族最多保留 1 只（main 的种族也可再出 1 只）；
+       3) 按原始排名（得分 + 生日距离）先后放入；
+       4) 不足 6 时再用第 2 轮（同种族也可）补齐。*/
+  const pool = scored.slice(1, 41).map(x => x.v);
+  const usedSpecies = new Set();
+  const list = [];
+  for (const x of pool) {
+    if (list.length >= 6) break;
+    if (usedSpecies.has(x.s)) continue;
+    if (x.s === v.s) continue;           // 先把和 main 不同种族的挑进来
+    usedSpecies.add(x.s);
+    list.push(x);
+  }
+  // 确保列表里含 1 只与 main 同种族（哥们姐妹的感觉）
+  const sameSpOne = scored.slice(1).find(x => x.v.s === v.s);
+  if (sameSpOne && !list.find(x => x.n === sameSpOne.v.n) && list.length < 6) {
+    list.unshift(sameSpOne.v);
+  }
+  // 仍不足 6 时，从池子里补任意（允许重复种族）
+  for (const x of pool) {
+    if (list.length >= 6) break;
+    if (list.find(y => y.n === x.n)) continue;
+    list.push(x);
+  }
+  list.splice(6);
+  const ul = $('#match-list-ul');
+  ul.innerHTML = '';
+  if (list.length === 0) {
+    $('#match-list').style.display = 'none';
+  } else {
+    $('#match-list').style.display = 'block';
+    list.forEach(x => {
+      const li = document.createElement('li');
+      li.className = 'match-item';
+      li.innerHTML = `<b>${x.n}</b><span class="mi-sub">${SPECIES_EMOJI[x.s]||''} ${x.s} · ${x.pf||x.p}</span>`;
+      li.addEventListener('click', () => openDetail(x));
+      ul.appendChild(li);
+    });
+  }
+
+  showScreen('#screen-result');
+}
+
+/* ============ 事件绑定 ============ */
+function startQuiz() {
+  state.idx = 0;
+  state.answers = new Array(QUESTIONS.length).fill(-1);
+  renderQuestion();
+  showScreen('#screen-quiz');
+}
+$('#btn-start').addEventListener('click', startQuiz);
+/* 点击 hero 图也可以开始测试 */
+const heroImg = document.querySelector('.hero-image-wrap');
+if (heroImg) {
+  heroImg.style.cursor = 'pointer';
+  heroImg.addEventListener('click', startQuiz);
+}
+$('#btn-prev').addEventListener('click', () => {
+  if (state.idx > 0) { state.idx--; renderQuestion(); }
+});
+$('#btn-restart').addEventListener('click', () => restart());
+$('#btn-restart2').addEventListener('click', () => restart());
+$('#btn-back-quiz').addEventListener('click', () => {
+  state.idx = QUESTIONS.length - 1;
+  renderQuestion();
+  showScreen('#screen-quiz');
+});
+$('#btn-reveal').addEventListener('click', () => {
+  state.month = +$('#sel-month').value;
+  state.day = +$('#sel-day').value;
+  showScreen('#screen-loading');
+  setTimeout(renderResult, 1400);
+});
+$('#btn-again').addEventListener('click', restart);
+$('#btn-share').addEventListener('click', () => {
+  alert('请长按页面截图分享给朋友吧～ 📸');
+});
+$('#btn-detail').addEventListener('click', () => {
+  if (state.currentMatch) openDetail(state.currentMatch);
+});
+$('#btn-detail-close').addEventListener('click', () => {
+  showScreen('#screen-result');
+});
+$('#btn-detail-again').addEventListener('click', restart);
+
+function restart() {
+  state.idx = 0;
+  state.answers = new Array(QUESTIONS.length).fill(-1);
+  state.currentMatch = null;
+  showScreen('#screen-welcome');
+}
+
+/* ============ 详情页渲染 ============
+   展示字段：生日 / 性格 / 初始口头禅 / 爱好 / 风格偏好
+             喜爱颜色 / 音高 / 种族 / 座右铭 / 常见外文名
+   ================================================================ */
+function openDetail(v) {
+  const imgEl = $('#d-portrait'), fbEl = $('#d-portrait-fb');
+  if (v.img) {
+    imgEl.style.display = '';
+    fbEl.style.display = 'none';
+    imgEl.onerror = () => {
+      imgEl.style.display = 'none';
+      fbEl.style.display = '';
+      fbEl.textContent = SPECIES_EMOJI[v.s] || '🐾';
+    };
+    imgEl.src = v.img;
+    imgEl.alt = v.n;
+  } else {
+    imgEl.style.display = 'none';
+    fbEl.style.display = '';
+    fbEl.textContent = SPECIES_EMOJI[v.s] || '🐾';
+  }
+
+  const pi = PERSONALITY_INFO[v.p] || { emoji:'', color:'#eee' };
+  $('#d-name').textContent = v.n + (v.g||'');
+  $('#d-fname').textContent = v.fn || '';
+  $('#d-tags').innerHTML = `
+    <span class="tag">${SPECIES_EMOJI[v.s]||''} ${v.s}</span>
+    <span class="tag" style="background:${pi.color}">${pi.emoji} ${v.pf||v.p}</span>
+    <span class="tag">🎂 ${v.m}月${v.d}日</span>
+  `;
+
+  const items = [
+    { lbl:'🎂 生日',     val:`${v.m}月${v.d}日`, cls:'accent-y' },
+    { lbl:'🐾 种族',     val: v.s, cls:'accent-g' },
+    { lbl:'🎭 性格',     val: v.pf || v.p, cls:'accent-p' },
+    { lbl:'🎵 音高',     val: v.pt || '—', cls:'accent-b' },
+    { lbl:'💬 初始口头禅', val: v.c || '—', cls:'accent-o' },
+    { lbl:'🎯 爱好',     val: v.h || '—' },
+    { lbl:'👔 风格偏好', val: v.st || '—' },
+    { lbl:'🎨 喜爱颜色', val: v.co || '—' },
+    { lbl:'📜 座右铭',   val: v.mo || '—', cls:'accent-y full' },
+    { lbl:'🌏 常见外文名', val: v.fn || '—', cls:'full' },
+  ];
+  $('#info-grid').innerHTML = items.map(it => `
+    <div class="info-item ${it.cls||''}">
+      <div class="info-label">${it.lbl}</div>
+      <div class="info-value">${it.val}</div>
+    </div>
+  `).join('');
+
+  $('#d-banner').textContent = '岛民档案 · ' + v.n;
+  const link = 'https://wiki.biligame.com/dongsen/' + encodeURIComponent(v.n);
+  $('#d-wikilink').href = link;
+
+  showScreen('#screen-detail');
+}
+</script>
+</body>
+</html>
